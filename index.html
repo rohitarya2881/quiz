@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quiz Manager</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+    <!-- Header -->
+    <header>
+        <button id="toggle-header-btn" onclick="toggleMenu()">☰</button>
+
+        <!-- Folder Selection -->
+        <select id="folderSelect" onchange="selectFolder()">
+            <option value="" disabled selected>Select a folder</option>
+        </select>
+
+        <!-- Start Quiz Button (Initially Hidden) -->
+        <button id="startQuizBtn" class="quiz-btn hidden" onclick="startQuiz()">Start Quiz</button>
+
+        <!-- Search Bar -->
+        <div class="search-bar">
+            <input type="text" id="searchTag" placeholder="Search" oninput="searchByTag()"> 
+            <button onclick="searchByTag()">🔍</button>
+        </div>
+    </header>
+
+    <!-- Sidebar Menu -->
+    <div id="mobile-menu">
+        <button id="close-menu-btn" onclick="toggleMenu()">&times;</button>
+
+        <h3>Quiz Management</h3>
+        
+        <button class="button-quiz" onclick="createFolder()">Create Folder</button>
+        <button class="button-quiz" onclick="document.getElementById('jsonFileInputUpload').click()">Upload Quiz JSON</button>
+        <button class="button-quiz" onclick="document.getElementById('jsonFileInputRestore').click()">Restore Data</button>
+        <button class="button-quiz" onclick="downloadData()">Download Memory</button>
+        <button class="button-quiz" onclick="toggleTheme()">Toggle Theme</button>
+        <button class="button-quiz" onclick="shuffleQuiz()">Shuffle Quiz</button>
+
+        <!-- Hidden File Inputs -->
+        <input type="file" id="jsonFileInputUpload" style="display: none;" accept=".json" onchange="handleFileUpload(event)">
+        <input type="file" id="jsonFileInputRestore" style="display: none;" accept=".json" onchange="restoreData(event)">
+    </div>
+
+    <!-- Main Quiz Area -->
+    <div class="container">
+        <h1 id="quiz-title">Select a Quiz</h1>
+        <div id="quizRange">
+            <p>Total Questions: <span id="totalQuestions">0</span></p>
+            <label>Start Index: <input type="number" id="startIndex" min="1" value="1"></label>
+            <label>End Index: <input type="number" id="endIndex" min="1" value="1"></label>
+        </div>
+        <button class="quiz-btn" onclick="showDifficultQuestions()">Show Difficult Questions</button>
+
+        <div id="quizOptions" class="hidden">
+            <button class="quiz-btn" onclick="startQuiz('complete')">Complete Quiz</button>
+            <button class="quiz-btn" onclick="startQuiz('difficult')">Difficult Part</button>
+        </div>
+        
+        <div id="quizContainer" class="container hidden">
+            <h2 id="question-text">Question will appear here</h2>
+            <div id="options"></div>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
