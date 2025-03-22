@@ -380,12 +380,112 @@ function selectAnswer(selectedIndex) {
     loadQuestion();
 }
 
+// function showDifficultQuestions() {
+//     if (!currentFolder) {
+//         alert("Please select a folder first!");
+//         return;
+//     }
+
+//     let incorrectData = JSON.parse(localStorage.getItem("incorrectCounts")) || {};
+//     let allQuestions = quizzes[currentFolder] || [];
+
+//     // Filter questions that were answered incorrectly at least once
+//     let difficultQuestions = allQuestions.map(q => {
+//         let key = `${currentFolder}_${q.question}`;
+//         return { ...q, wrongCount: incorrectData[key] || 0 };
+//     }).filter(q => q.wrongCount > 0);
+
+//     // Sort by most incorrect attempts
+//     difficultQuestions.sort((a, b) => b.wrongCount - a.wrongCount);
+
+//     if (difficultQuestions.length === 0) {
+//         alert("No difficult questions found. Try the full quiz first!");
+//         return;
+//     }
+
+//     // Store difficult questions globally for later use
+//     localStorage.setItem("difficultQuiz", JSON.stringify(difficultQuestions));
+
+//     // Display Difficult Questions with Range Selection
+//     document.getElementById("quizContainer").innerHTML = `
+//         <h2>Most Difficult Questions</h2>
+//         <p>Total Difficult Questions: <span id="difficultTotal">${difficultQuestions.length}</span></p>
+//         <label>Start Index: <input type="number" id="difficultStart" min="1" max="${difficultQuestions.length}" value="1"></label>
+//         <label>End Index: <input type="number" id="difficultEnd" min="1" max="${difficultQuestions.length}" value="${difficultQuestions.length}"></label>
+//         <ul id="difficult-list"></ul>
+//         <button class="quiz-btn" onclick="startDifficultQuiz()">Attempt These Questions</button>
+//     `;
+
+//     const listContainer = document.getElementById("difficult-list");
+//     difficultQuestions.forEach((q, index) => {
+//         const li = document.createElement("li");
+//         li.innerHTML = `
+//             <p><strong>Q${index + 1}:</strong> ${q.question}</p>
+//             <p><span style="color: red;">❌ Wrong Attempts:</span> ${q.wrongCount}</p>
+//             <hr>
+//         `;
+//         listContainer.appendChild(li);
+//     });
+// }
+
+// function showDifficultQuestions() {
+//     if (!currentFolder) {
+//         alert("Please select a folder first!");
+//         return;
+//     }
+
+//     // Retrieve incorrect counts from localStorage
+//     let incorrectData = JSON.parse(localStorage.getItem("incorrectCounts")) || {};
+//     let allQuestions = quizzes[currentFolder] || [];
+
+//     // Filter questions that were answered incorrectly at least once
+//     let difficultQuestions = allQuestions.map(q => {
+//         let key = `${currentFolder}_${q.question}`;
+//         return { ...q, wrongCount: incorrectData[key] || 0 };
+//     }).filter(q => q.wrongCount > 0);
+
+//     // Sort by most incorrect attempts
+//     difficultQuestions.sort((a, b) => b.wrongCount - a.wrongCount);
+
+//     if (difficultQuestions.length === 0) {
+//         alert("No difficult questions found. Try the full quiz first!");
+//         document.getElementById("quizContainer").innerHTML = ""; // Clear the container
+//         return;
+//     }
+
+//     // Store difficult questions globally for later use
+//     localStorage.setItem("difficultQuiz", JSON.stringify(difficultQuestions));
+
+//     // Display Difficult Questions with Range Selection
+//     document.getElementById("quizContainer").innerHTML = `
+//         <h2>Most Difficult Questions</h2>
+//         <p>Total Difficult Questions: <span id="difficultTotal">${difficultQuestions.length}</span></p>
+//         <label>Start Index: <input type="number" id="difficultStart" min="1" max="${difficultQuestions.length}" value="1"></label>
+//         <label>End Index: <input type="number" id="difficultEnd" min="1" max="${difficultQuestions.length}" value="${difficultQuestions.length}"></label>
+//         <ul id="difficult-list"></ul>
+//         <button class="quiz-btn" onclick="startDifficultQuiz()">Attempt These Questions</button>
+//     `;
+
+//     // Display the list of difficult questions
+//     const listContainer = document.getElementById("difficult-list");
+//     difficultQuestions.forEach((q, index) => {
+//         const li = document.createElement("li");
+//         li.innerHTML = `
+//             <p><strong>Q${index + 1}:</strong> ${q.question}</p>
+//             <p><span style="color: red;">❌ Wrong Attempts:</span> ${q.wrongCount}</p>
+//             <hr>
+//         `;
+//         listContainer.appendChild(li);
+//     });
+// }
+
 function showDifficultQuestions() {
     if (!currentFolder) {
         alert("Please select a folder first!");
         return;
     }
 
+    // Retrieve incorrect counts from localStorage
     let incorrectData = JSON.parse(localStorage.getItem("incorrectCounts")) || {};
     let allQuestions = quizzes[currentFolder] || [];
 
@@ -400,11 +500,12 @@ function showDifficultQuestions() {
 
     if (difficultQuestions.length === 0) {
         alert("No difficult questions found. Try the full quiz first!");
+        document.getElementById("quizContainer").innerHTML = ""; // Clear the container
         return;
     }
 
-    // Store difficult questions globally for later use
-    localStorage.setItem("difficultQuiz", JSON.stringify(difficultQuestions));
+    // Clear the quiz container before displaying new content
+    document.getElementById("quizContainer").innerHTML = "";
 
     // Display Difficult Questions with Range Selection
     document.getElementById("quizContainer").innerHTML = `
@@ -416,6 +517,7 @@ function showDifficultQuestions() {
         <button class="quiz-btn" onclick="startDifficultQuiz()">Attempt These Questions</button>
     `;
 
+    // Display the list of difficult questions
     const listContainer = document.getElementById("difficult-list");
     difficultQuestions.forEach((q, index) => {
         const li = document.createElement("li");
@@ -427,6 +529,7 @@ function showDifficultQuestions() {
         listContainer.appendChild(li);
     });
 }
+
 
 
 // Load Question
@@ -448,8 +551,34 @@ function loadQuestion() {
     });
 }
 
-function startDifficultQuiz() {
+// function startDifficultQuiz() {
     
+//     let difficultQuiz = JSON.parse(localStorage.getItem("difficultQuiz")) || [];
+//     if (difficultQuiz.length === 0) {
+//         alert("No difficult questions found!");
+//         return;
+//     }
+
+//     let totalDifficult = difficultQuiz.length;
+//     let startIndex = parseInt(document.getElementById("difficultStart").value) - 1;
+//     let endIndex = parseInt(document.getElementById("difficultEnd").value);
+
+//     if (isNaN(startIndex) || isNaN(endIndex) || startIndex < 0 || endIndex > totalDifficult || startIndex >= endIndex) {
+//         alert(`Invalid range! Choose between 1 and ${totalDifficult}.`);
+//         return;
+//     }
+
+//     // Apply range filter to difficult questions
+//     currentQuiz = difficultQuiz.slice(startIndex, endIndex);
+//     currentQuestionIndex = 0;
+//     score = 0;
+//     incorrectQuestions = [];
+    
+//     document.getElementById("quizContainer").classList.remove("hidden");
+//     loadQuestion();
+// }
+
+function startDifficultQuiz() {
     let difficultQuiz = JSON.parse(localStorage.getItem("difficultQuiz")) || [];
     if (difficultQuiz.length === 0) {
         alert("No difficult questions found!");
@@ -470,11 +599,10 @@ function startDifficultQuiz() {
     currentQuestionIndex = 0;
     score = 0;
     incorrectQuestions = [];
-    
+
     document.getElementById("quizContainer").classList.remove("hidden");
     loadQuestion();
 }
-
 
 
 
