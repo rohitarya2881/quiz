@@ -4,6 +4,7 @@ let currentFolder = "";
 let currentQuestionIndex = 0;
 let incorrectQuestions = [];
 let score = 0;
+let quizMode = ""; // Add this at the top with other global variables
 
 // Sidebar Toggle
 function toggleMenu() {
@@ -293,6 +294,8 @@ function selectFolder() {
 
 // Start Quiz
 function startQuiz(mode) {
+        quizMode = mode; // Set the quiz mode
+
     if (!currentFolder || !quizzes[currentFolder]) {
         alert("Please select a valid folder!");
         return;
@@ -446,6 +449,7 @@ function loadQuestion() {
 }
 
 function startDifficultQuiz() {
+    
     let difficultQuiz = JSON.parse(localStorage.getItem("difficultQuiz")) || [];
     if (difficultQuiz.length === 0) {
         alert("No difficult questions found!");
@@ -577,6 +581,8 @@ function restartQuiz() {
         <h2 id="question-text">Question will appear here</h2>
         <div id="options"></div>
     `;
+        quizMode = ""; // Reset quiz mode
+
     startQuiz(quizMode);
 }
 
