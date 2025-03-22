@@ -326,6 +326,31 @@ function startQuiz(mode) {
     loadQuestion();
 }
 
+// function selectAnswer(selectedIndex) {
+//     const questionData = currentQuiz[currentQuestionIndex];
+
+//     if (questionData.correctIndex !== selectedIndex) {
+//         // Initialize or update incorrect count
+//         let incorrectData = JSON.parse(localStorage.getItem("incorrectCounts")) || {};
+//         let questionKey = `${currentFolder}_${questionData.question}`;
+
+//         incorrectData[questionKey] = (incorrectData[questionKey] || 0) + 1; // Increment count
+//         localStorage.setItem("incorrectCounts", JSON.stringify(incorrectData));
+
+//         // Store incorrect question details
+//         incorrectQuestions.push({
+//             question: questionData.question,
+//             options: questionData.options,
+//             correctIndex: questionData.correctIndex
+//         });
+//     } else {
+//         score++;
+//     }
+
+//     currentQuestionIndex++;
+//     loadQuestion();
+// }
+
 function selectAnswer(selectedIndex) {
     const questionData = currentQuiz[currentQuestionIndex];
 
@@ -340,6 +365,7 @@ function selectAnswer(selectedIndex) {
         // Store incorrect question details
         incorrectQuestions.push({
             question: questionData.question,
+            selectedAnswer: questionData.options[selectedIndex], // Add this line
             options: questionData.options,
             correctIndex: questionData.correctIndex
         });
@@ -479,6 +505,40 @@ function startDifficultQuiz() {
 
 
 // Show Results
+// function showResults() {
+//     document.getElementById("quizContainer").innerHTML = `
+//         <h2>Quiz Completed!</h2>
+//         <p>Your Score: ${score} / ${currentQuiz.length}</p>
+//         <h3>Incorrect Questions:</h3>
+//         <div id="incorrect-answers"></div>
+//         <button class="quiz-btn" onclick="restartQuiz()">Restart Quiz</button>
+//     `;
+
+//     const incorrectContainer = document.getElementById("incorrect-answers");
+//     if (incorrectQuestions.length === 0) {
+//         incorrectContainer.innerHTML = "<p>Great job! No incorrect answers 🎉</p>";
+//     } else {
+//         incorrectQuestions.forEach(item => {
+//             const div = document.createElement("div");
+//             div.classList.add("incorrect-item");
+//             div.innerHTML = `
+//                 <p><strong>Question:</strong> ${item.question}</p>
+//                 <p><span style="color: red;">❌ Your Answer:</span> ${item.selectedAnswer}</p>
+//                 <p><span style="color: green;">✔ Correct Answer:</span> ${item.options[item.correctIndex]}</p>
+//                 <hr>
+//             `;
+//             incorrectContainer.appendChild(div);
+//         });
+//     }
+
+//     // Save Incorrect Questions for "Difficult" mode
+//     if (incorrectQuestions.length > 0 && quizMode === "complete") {
+//         quizzes[`${currentFolder}_Incorrect`] = incorrectQuestions;
+//         saveToLocalStorage();
+//     }
+// }
+
+
 function showResults() {
     document.getElementById("quizContainer").innerHTML = `
         <h2>Quiz Completed!</h2>
@@ -511,7 +571,6 @@ function showResults() {
         saveToLocalStorage();
     }
 }
-
 // Restart Quiz
 function restartQuiz() {
     document.getElementById("quizContainer").innerHTML = `
