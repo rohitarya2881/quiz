@@ -4,6 +4,7 @@ body {
     margin: 0;
     padding: 0;
     background: #f8f9fa;
+    overflow-x: hidden;
 }
 
 /* Header Styling */
@@ -14,6 +15,8 @@ header {
     align-items: center;
     padding: 10px;
     justify-content: space-between;
+    position: relative;
+    z-index: 100;
 }
 
 #toggle-header-btn {
@@ -25,29 +28,22 @@ header {
     margin-right: 10px;
 }
 
-.search-bar {
-    display: flex;
-    align-items: center;
-}
-
-.search-bar input {
-    padding: 5px;
-    border-radius: 4px;
-    border: 1px solid #ccc;
-}
-
-.search-bar button {
-    background: #2980b9;
-    color: white;
+#headerHomeBtn {
+    background: #1d1e1f;
+    color: rgb(206, 24, 24);
     border: none;
-    padding: 5px 10px;
+    padding: 8px 12px;
     border-radius: 4px;
     cursor: pointer;
-    margin-left: 5px;
+    margin-left: 10px;
+    font-size: 16px;
+    display: inline-block;
+    width: fit-content;
 }
 
-.search-bar button:hover {
+#headerHomeBtn:hover {
     background: #1f618d;
+    color: white;
 }
 
 /* Sidebar Menu */
@@ -57,11 +53,13 @@ header {
     color: white;
     padding: 15px;
     top: 0;
-    left: -260px;
+    left: -290px;
     height: 100vh;
     transition: 0.3s;
     display: flex;
     flex-direction: column;
+    width: 250px;
+    z-index: 1000;
 }
 
 #mobile-menu.show {
@@ -77,6 +75,7 @@ header {
     padding: 5px 10px;
     text-align: right;
     align-self: flex-end;
+    margin-bottom: 10px;
 }
 
 #mobile-menu h3 {
@@ -95,6 +94,7 @@ header {
     cursor: pointer;
     width: 100%;
     text-align: left;
+    font-size: 14px;
 }
 
 .sidebar-btn:hover {
@@ -136,6 +136,8 @@ header {
     border-radius: 5px;
     cursor: pointer;
     text-align: center;
+    font-size: 14px;
+    transition: background 0.3s, color 0.3s;
 }
 
 .option-btn:hover {
@@ -147,9 +149,11 @@ header {
     background: #2980b9;
     color: white;
 }
-.button-quiz{
+
+.button-quiz {
     margin-top: 10px;
 }
+
 /* Quiz Navigation Buttons */
 .quiz-btn {
     background: #27ae60;
@@ -160,9 +164,17 @@ header {
     border-radius: 4px;
     cursor: pointer;
     width: 80%;
+    font-size: 14px;
+    transition: background 0.3s;
 }
+
+.quiz-btn:hover {
+    background: #218c54;
+}
+
+/* Folder Selection Dropdown */
 #folderSelect {
-    padding: 4px;
+    padding: 8px;
     font-size: 16px;
     border: 2px solid #2980b9;
     border-radius: 5px;
@@ -170,7 +182,7 @@ header {
     color: #2c3e50;
     outline: none;
     cursor: pointer;
-    transition: 0.3s;
+    transition: border-color 0.3s, box-shadow 0.3s;
 }
 
 #folderSelect:hover {
@@ -182,11 +194,268 @@ header {
     box-shadow: 0px 0px 5px rgba(39, 174, 96, 0.5);
 }
 
-.quiz-btn:hover {
-    background: #218c54;
-}
-
 /* Hide Elements */
 .hidden {
     display: none;
+}
+
+/* Difficult Questions Styling */
+.difficult-question {
+    background: #f8f9fa;
+    padding: 10px;
+    margin: 10px 0;
+    border-radius: 5px;
+    border: 1px solid #ddd;
+}
+
+.difficult-question p {
+    margin: 5px 0;
+}
+
+.difficult-question strong {
+    color: #2c3e50;
+}
+
+/* Incorrect Answers Styling */
+.incorrect-item {
+    background: #fff3f3;
+    padding: 10px;
+    margin: 10px 0;
+    border-radius: 5px;
+    border: 1px solid #ffcccc;
+}
+
+.incorrect-item p {
+    margin: 5px 0;
+}
+
+.incorrect-item span {
+    font-weight: bold;
+}
+
+/* Responsive Styles */
+@media (max-width: 768px) {
+    /* Header Adjustments */
+    header {
+        flex-wrap: wrap;
+        padding: 10px 5px;
+    }
+
+    #headerHomeBtn {
+        margin-left: 5px;
+        padding: 6px 10px;
+        font-size: 14px;
+    }
+
+    #folderSelect {
+        width: 100%;
+        margin: 5px 0;
+    }
+
+    /* Sidebar Adjustments */
+    #mobile-menu {
+        width: 200px;
+        left: -300px;
+    }
+
+    /* Container Adjustments */
+    .container {
+        padding: 10px;
+        margin-top: 10px;
+    }
+
+    .quiz-btn {
+        width: 90%;
+    }
+
+    .option-btn {
+        width: 90%;
+    }
+}
+
+@media (max-width: 480px) {
+    /* Header Adjustments */
+    #headerHomeBtn {
+        margin-left: 0;
+        margin-top: 5px;
+        width: 100%;
+    }
+
+    #toggle-header-btn {
+        margin-right: 5px;
+    }
+
+    /* Sidebar Adjustments */
+    #mobile-menu {
+        width: 180px;
+        left: -280px;
+    }
+
+    /* Quiz Question Adjustments */
+    #question-text {
+        font-size: 16px;
+    }
+
+    /* Quiz Options Adjustments */
+    .option-btn {
+        font-size: 12px;
+    }
+
+    /* Quiz Navigation Buttons Adjustments */
+    .quiz-btn {
+        font-size: 12px;
+    }
+}
+
+
+
+
+
+
+
+
+
+/* Flashcard Main Container (Parent) */
+#flashcardContainer {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); /* Responsive grid */
+    gap: 20px; /* Spacing between flashcards */
+    padding: 20px;
+    background: white;
+    box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);
+    border-radius: 8px;
+    width: 90%;
+    max-width: 1200px;
+    margin: 20px auto;
+    justify-items: center; /* Centers flashcards */
+}
+
+/* Flashcard (Child) */
+.flashcard {
+    width: 250px; /* Fixed width */
+    height: 250px; /* Fixed height */
+    perspective: 1000px; /* Enables 3D flip effect */
+    cursor: pointer;
+    position: relative; /* Ensures proper stacking context */
+}
+
+/* Flashcard Inner Container (Grandchild) */
+.flashcard-inner {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    transform-style: preserve-3d; /* Enables 3D transformations */
+    transition: transform 0.6s; /* Smooth flip animation */
+}
+
+/* Flipped State */
+.flashcard.flipped .flashcard-inner {
+    transform: rotateY(180deg); /* Flip the card */
+}
+
+/* Flashcard Front and Back (Great-Grandchildren) */
+.flashcard-front, .flashcard-back {
+    position: absolute;
+    width: 90%; /* Slightly smaller than the parent */
+    height: 90%; /* Slightly smaller than the parent */
+    backface-visibility: hidden; /* Hide the back face when flipped */
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    border: 1px solid #ccc;
+    border-radius: 10px;
+    padding: 15px;
+    box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);
+    background: white;
+    text-align: center;
+}
+
+/* Flashcard Back Face */
+.flashcard-back {
+    background: #f8f9fa;
+    transform: rotateY(180deg); /* Initially hidden */
+}
+
+/* Flashcard Content (Great-Great-Grandchildren) */
+.flashcard-content h3 {
+    margin-bottom: 8px;
+    font-size: 18px;
+}
+
+.flashcard-content p {
+    margin: 5px 0;
+    font-size: 14px;
+}
+
+.flashcard-content ul {
+    padding-left: 15px;
+    text-align: left;
+}
+
+/* Highlight Incorrect Attempts */
+.incorrect-attempt {
+    color: red;
+    font-weight: bold;
+}
+
+/* Responsive Adjustments */
+@media (max-width: 1024px) {
+    #flashcardContainer {
+        grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); /* Adjust grid for smaller screens */
+    }
+
+    .flashcard {
+        width: 220px; /* Slightly smaller flashcards */
+        height: 220px;
+    }
+
+    .flashcard-content h3 {
+        font-size: 16px; /* Smaller font size */
+    }
+
+    .flashcard-content p {
+        font-size: 12px; /* Smaller font size */
+    }
+}
+
+@media (max-width: 768px) {
+    #flashcardContainer {
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); /* Adjust grid for tablets */
+        gap: 15px; /* Reduce gap between flashcards */
+    }
+
+    .flashcard {
+        width: 200px; /* Smaller flashcards for tablets */
+        height: 200px;
+    }
+
+    .flashcard-content h3 {
+        font-size: 14px; /* Smaller font size */
+    }
+
+    .flashcard-content p {
+        font-size: 12px; /* Smaller font size */
+    }
+}
+
+@media (max-width: 480px) {
+    #flashcardContainer {
+        grid-template-columns: 1fr; /* Single column for mobile */
+    }
+
+    .flashcard {
+        width: 100%; /* Full width for mobile */
+        max-width: 90vw; /* Limit maximum width */
+        height: 180px; /* Reduce height for mobile */
+        margin-bottom: .5rem;
+    }
+
+    .flashcard-content h3 {
+        font-size: 14px; /* Smaller font size */
+    }
+
+    .flashcard-content p {
+        font-size: 12px; /* Smaller font size */
+    }
 }
