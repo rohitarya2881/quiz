@@ -333,7 +333,7 @@ header {
 /* Flashcard (Child) */
 .flashcard {
     width: 250px; /* Fixed width */
-    height: 250px; /* Fixed height */
+    height: 265px; /* Fixed height */
     perspective: 1000px; /* Enables 3D flip effect */
     cursor: pointer;
     position: relative; /* Ensures proper stacking context */
@@ -369,6 +369,8 @@ header {
     box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);
     background: white;
     text-align: center;
+    overflow-y: scroll;
+    scrollbar-width: none;
 }
 
 /* Flashcard Back Face */
@@ -427,7 +429,7 @@ header {
 
     .flashcard {
         width: 200px; /* Smaller flashcards for tablets */
-        height: 200px;
+        height: 240px;
     }
 
     .flashcard-content h3 {
@@ -447,15 +449,15 @@ header {
     .flashcard {
         width: 100%; /* Full width for mobile */
         max-width: 90vw; /* Limit maximum width */
-        height: 180px; /* Reduce height for mobile */
+        height: 245px; /* Reduce height for mobile */
         margin-bottom: .5rem;
     }
 
     .flashcard-content h3 {
-        font-size: 14px; /* Smaller font size */
+        font-size: 18px; /* Smaller font size */
     }
 
     .flashcard-content p {
-        font-size: 12px; /* Smaller font size */
+        font-size: 16px; /* Smaller font size */
     }
 }
