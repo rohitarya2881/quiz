@@ -429,7 +429,7 @@ header {
 
     .flashcard {
         width: 200px; /* Smaller flashcards for tablets */
-        height: 240px;
+        height: 255px;
     }
 
     .flashcard-content h3 {
@@ -449,7 +449,7 @@ header {
     .flashcard {
         width: 100%; /* Full width for mobile */
         max-width: 90vw; /* Limit maximum width */
-        height: 245px; /* Reduce height for mobile */
+        height: 255px; /* Reduce height for mobile */
         margin-bottom: .5rem;
     }
 
