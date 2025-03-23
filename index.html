@@ -21,30 +21,27 @@
         <button id="startQuizBtn" class="quiz-btn hidden" onclick="startQuiz()">Start Quiz</button>
 
         <!-- Search Bar -->
-        <div class="search-bar">
-            <input type="text" id="searchTag" placeholder="Search" oninput="searchByTag()"> 
-            <button onclick="searchByTag()">🔍</button>
-        </div>
+        <button id="headerHomeBtn" class="quiz-btn" onclick="goHome()">🏠 Home</button>
+
     </header>
 
     <!-- Sidebar Menu -->
     <div id="mobile-menu">
         <button id="close-menu-btn" onclick="toggleMenu()">&times;</button>
-
         <h3>Quiz Management</h3>
-        
         <button class="button-quiz" onclick="createFolder()">Create Folder</button>
         <button class="button-quiz" onclick="document.getElementById('jsonFileInputUpload').click()">Upload Quiz JSON</button>
         <button class="button-quiz" onclick="document.getElementById('jsonFileInputRestore').click()">Restore Data</button>
         <button class="button-quiz" onclick="downloadData()">Download Memory</button>
         <button class="button-quiz" onclick="toggleTheme()">Toggle Theme</button>
         <button class="button-quiz" onclick="shuffleQuiz()">Shuffle Quiz</button>
+        <button class="button-quiz" onclick="clearMemory()">Clear Memory</button>
 
-        <!-- Hidden File Inputs -->
+        <!-- Flashcard Button -->
+        <button class="button-quiz" onclick="showFlashcards()">Flashcards</button>
         <input type="file" id="jsonFileInputUpload" style="display: none;" accept=".json" onchange="handleFileUpload(event)">
         <input type="file" id="jsonFileInputRestore" style="display: none;" accept=".json" onchange="restoreData(event)">
-    </div>
-
+    </div> 
     <!-- Main Quiz Area -->
     <div class="container">
         <h1 id="quiz-title">Select a Quiz</h1>
@@ -64,8 +61,10 @@
             <h2 id="question-text">Question will appear here</h2>
             <div id="options"></div>
         </div>
-    </div>
 
-    <script src="script.js"></script>
+    </div>
+    <div id="flashcardContainer" class="flashcard-main-container hidden"></div>
+
+    <script src="script2.js"></script>
 </body>
 </html>
