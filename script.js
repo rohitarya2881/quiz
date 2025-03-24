@@ -78,16 +78,27 @@ function handleFileUpload(event) {
     alert("No file selected!");
     return;
   }
+
   const reader = new FileReader();
   reader.onload = function () {
     try {
       const quizData = JSON.parse(reader.result);
-      if (Array.isArray(quizData)) {
+
+      if (Array.isArray(quizData) && quizData.every(q => "question" in q && "options" in q && "correctIndex" in q)) {
+        // Ensure all questions have an "explanation" key
+        quizData.forEach(q => {
+          if (!("explanation" in q)) {
+            q.explanation = ""; // Set to empty string if missing
+          }
+        });
+
+        // Store in quizzes object and save to localStorage
         quizzes[currentFolder] = quizData;
-        saveToLocalStorage();
-        alert("Quiz uploaded successfully!");
+        saveToLocalStorage(); // Save updated data
+
+        alert("Quiz uploaded and saved successfully!");
       } else {
-        alert("Invalid JSON format! Expected an array of questions.");
+        alert("Invalid JSON format! Ensure each question has 'question', 'options', and 'correctIndex'.");
       }
     } catch (e) {
       alert("Error parsing JSON file. Please ensure the file is valid.");
@@ -95,6 +106,7 @@ function handleFileUpload(event) {
   };
   reader.readAsText(file);
 }
+
 
 // Clear all quizzes from localStorage
 function clearLocalStorage() {
@@ -253,43 +265,49 @@ function restoreData(event) {
 // Start the quiz
 function startQuiz(mode) {
   if (!currentFolder || !quizzes[currentFolder] || quizzes[currentFolder].length === 0) {
-    alert("Please select a valid folder with questions!");
-    return;
+      alert("Please select a valid folder with questions!");
+      return;
   }
 
   let totalQuestions = quizzes[currentFolder].length;
   let startIndex = parseInt(document.getElementById("startIndex").value) - 1;
   let endIndex = parseInt(document.getElementById("endIndex").value);
 
-  if (
-    isNaN(startIndex) ||
-    isNaN(endIndex) ||
-    startIndex < 0 ||
-    endIndex > totalQuestions ||
-    startIndex >= endIndex
-  ) {
-    alert(`Invalid range! Choose between 1 and ${totalQuestions}.`);
-    return;
-  }
-
-  quizMode = mode;
-  if (mode === "difficult") {
-    currentQuiz = quizzes[`${currentFolder}_Incorrect`] || [];
-    if (currentQuiz.length === 0) {
-      alert("No difficult questions stored yet. Try the complete quiz first.");
+  if (isNaN(startIndex) || isNaN(endIndex) || startIndex < 0 || endIndex > totalQuestions || startIndex >= endIndex) {
+      alert(`Invalid range! Choose between 1 and ${totalQuestions}.`);
       return;
-    }
-  } else {
-    currentQuiz = quizzes[currentFolder].slice(startIndex, endIndex);
   }
 
+  // 🛑 **Reset Quiz State to avoid showing previous data**
   currentQuestionIndex = 0;
   score = 0;
   incorrectQuestions = [];
+
+  // 🛑 **Clear previous results & reset UI**
+  document.getElementById("quizContainer").innerHTML = `
+      <h2 id="question-text">Question will appear here</h2>
+      <div id="options"></div>
+      <p id="score-text"></p>
+  `;
+
+  quizMode = mode;
+
+  if (mode === "difficult") {
+      currentQuiz = quizzes[`${currentFolder}_Incorrect`] || [];
+      if (currentQuiz.length === 0) {
+          alert("No difficult questions stored yet. Try the complete quiz first.");
+          return;
+      }
+  } else {
+      currentQuiz = quizzes[currentFolder].slice(startIndex, endIndex);
+  }
+
   document.getElementById("quizContainer").classList.remove("hidden");
   document.getElementById("quizOptions").classList.add("hidden");
-  loadQuestion();
+
+  loadQuestion(); // 🛑 **Now it starts fresh**
 }
+
 
 // Load the current question
 function loadQuestion() {
@@ -331,32 +349,35 @@ function selectAnswer(selectedIndex) {
 // Show quiz results
 function showResults() {
   document.getElementById("quizContainer").innerHTML = `
-    <h2>Quiz Completed!</h2>
-    <p>Your Score: ${score} / ${currentQuiz.length}</p>
-    <h3>Incorrect Questions:</h3>
-    <div id="incorrect-answers"></div>
-    <button class="quiz-btn" onclick="restartQuiz()">Restart Quiz</button>
-    <button class="quiz-btn" onclick="goHome()">Home</button>
+      <h2>Quiz Completed!</h2>
+      <p>Your Score: ${score} / ${currentQuiz.length}</p>
+      <h3>Incorrect Questions:</h3>
+      <div id="incorrect-answers"></div>
+      <button class="quiz-btn" onclick="restartQuiz()">Restart Quiz</button>
+      <button class="quiz-btn" onclick="goHome()">Home</button>
   `;
 
   const incorrectContainer = document.getElementById("incorrect-answers");
+  
   if (incorrectQuestions.length === 0) {
-    incorrectContainer.innerHTML = "<p>Great job! No incorrect answers 🎉</p>";
+      incorrectContainer.innerHTML = "<p>Great job! No incorrect answers 🎉</p>";
   } else {
-    incorrectQuestions.forEach((item) => {
-      const div = document.createElement("div");
-      div.classList.add("incorrect-item");
-      div.innerHTML = `
-        <p><strong>Question:</strong> ${item.question}</p>
-        <p><span style="color: red;">❌ Your Answer:</span> ${item.selectedAnswer}</p>
-        <p><span style="color: green;">✔ Correct Answer:</span> ${item.options[item.correctIndex]}</p>
-        <hr>
-      `;
-      incorrectContainer.appendChild(div);
-    });
+      incorrectQuestions.forEach((item) => {
+          const div = document.createElement("div");
+          div.classList.add("incorrect-item");
+          div.innerHTML = `
+              <p><strong>Question:</strong> ${item.question}</p>
+              <p><span style="color: red;">❌ Your Answer:</span> ${item.selectedAnswer}</p>
+              <p><span style="color: green;">✔ Correct Answer:</span> ${item.options[item.correctIndex]}</p>
+              <p><strong>Explanation:</strong> ${item.explanation || "No explanation provided."}</p>
+              <hr>
+          `;
+          incorrectContainer.appendChild(div);
+      });
   }
+
   if (incorrectQuestions.length > 0 && quizMode === "complete") {
-    storeIncorrectQuestions();
+      storeIncorrectQuestions();
   }
 }
 
@@ -380,64 +401,66 @@ function restartQuiz() {
 
 
 function showFlashcards() {
-    if (!currentFolder || !quizzes[currentFolder] || quizzes[currentFolder].length === 0) {
-        alert("Please select a folder with questions first!");
-        return;
-    }
+  if (!currentFolder || !quizzes[currentFolder] || quizzes[currentFolder].length === 0) {
+      alert("Please select a folder with questions first!");
+      return;
+  }
 
-    // Hide the quiz container
-    document.getElementById("quizContainer").classList.add("hidden");
-    document.getElementById("quizOptions").classList.add("hidden");
+  // Hide quiz elements
+  document.getElementById("quizContainer").classList.add("hidden");
+  document.getElementById("quizOptions").classList.add("hidden");
 
-    // Show the flashcard container
-    const flashcardContainer = document.getElementById("flashcardContainer");
-    flashcardContainer.innerHTML = ""; // Clear previous content
-    flashcardContainer.classList.remove("hidden");
+  // Show the flashcard container
+  const flashcardContainer = document.getElementById("flashcardContainer");
+  flashcardContainer.innerHTML = ""; // Clear previous content
+  flashcardContainer.classList.remove("hidden");
 
-    // Get questions from the selected folder
-    const questions = quizzes[currentFolder];
+  // Get questions from the selected folder
+  const questions = quizzes[currentFolder];
 
-    // Create flashcards for each question
-    questions.forEach((question, index) => {
-        const flashcard = document.createElement("div");
-        flashcard.className = "flashcard";
-        flashcard.innerHTML = `
-            <div class="flashcard-inner">
-                <div class="flashcard-front">
-                    <div class="flashcard-content">
-                        <h3>Question ${index + 1}</h3>
-                        <p>${question.question}</p>
-                        <p><strong>Options:</strong></p>
-                        <ul>
-                            ${question.options.map((option, i) => `<li>${option}</li>`).join("")}
-                        </ul>
-                        <p><strong>Times Incorrect:</strong> ${question.timesIncorrect || 0}</p>
-                    </div>
-                </div>
-                <div class="flashcard-back">
-                    <div class="flashcard-content">
-                        <h3>Answer</h3>
-                        <p><strong>Correct Answer:</strong> ${question.options[question.correctIndex]}</p>
-                        <p><strong>Times Incorrect:</strong> ${question.timesIncorrect || 0}</p>
-                    </div>
-                </div>
-            </div>
-        `;
+  // Create flashcards
+  questions.forEach((question, index) => {
+      const flashcard = document.createElement("div");
+      flashcard.className = "flashcard";
+      flashcard.innerHTML = `
+          <div class="flashcard-inner">
+              <div class="flashcard-front">
+                  <div class="flashcard-content">
+                      <h3>Question ${index + 1}</h3>
+                      <p>${question.question}</p>
+                      <p><strong>Options:</strong></p>
+                      <ul>
+                          ${question.options.map((option, i) => `<li>${option}</li>`).join("")}
+                      </ul>
+                      <p><strong>Times Incorrect:</strong> ${question.timesIncorrect || 0}</p>
+                  </div>
+              </div>
+              <div class="flashcard-back">
+                  <div class="flashcard-content">
+                      <h3>Answer</h3>
+                      <p><strong>Correct Answer:</strong> ${question.options[question.correctIndex]}</p>
+                      <p><strong>Explanation:</strong> ${question.explanation || "No explanation provided."}</p>
+                      <p><strong>Times Incorrect:</strong> ${question.timesIncorrect || 0}</p>
+                  </div>
+              </div>
+          </div>
+      `;
 
-        // Add flip functionality
-        flashcard.addEventListener("click", () => {
-            flashcard.classList.toggle("flipped");
-        });
+      // Add flip functionality
+      flashcard.addEventListener("click", () => {
+          flashcard.classList.toggle("flipped");
+      });
 
-        // Highlight incorrect attempts
-        if (question.timesIncorrect > 0) {
-            const incorrectText = flashcard.querySelector(".flashcard-content p:last-child");
-            incorrectText.classList.add("incorrect-attempt");
-        }
+      // Highlight incorrect attempts
+      if (question.timesIncorrect > 0) {
+          const incorrectText = flashcard.querySelector(".flashcard-content p:last-child");
+          incorrectText.classList.add("incorrect-attempt");
+      }
 
-        flashcardContainer.appendChild(flashcard);
-    });
+      flashcardContainer.appendChild(flashcard);
+  });
 }
+
 
 
 // Function to clear memory (reset timesIncorrect to 0 for all questions)
