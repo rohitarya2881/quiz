@@ -489,3 +489,20 @@ function clearMemory() {
         }
     }
 }
+// Add this inside your flashcard creation loop
+const contentDiv = flashcard.querySelector('.flashcard-content');
+const frontContent = flashcard.querySelector('.flashcard-front .flashcard-content');
+const backContent = flashcard.querySelector('.flashcard-back .flashcard-content');
+
+// Check if content overflows and needs scrolling
+function checkOverflow() {
+    if (frontContent.scrollHeight > frontContent.clientHeight) {
+        frontContent.classList.add('scrollable');
+    }
+    if (backContent.scrollHeight > backContent.clientHeight) {
+        backContent.classList.add('scrollable');
+    }
+}
+
+// Run check after content loads
+setTimeout(checkOverflow, 50);
