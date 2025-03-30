@@ -337,6 +337,7 @@ header {
     perspective: 1000px; /* Enables 3D flip effect */
     cursor: pointer;
     position: relative; /* Ensures proper stacking context */
+    margin:10px;
 }
 
 /* Flashcard Inner Container (Grandchild) */
@@ -356,8 +357,8 @@ header {
 /* Flashcard Front and Back (Great-Grandchildren) */
 .flashcard-front, .flashcard-back {
     position: absolute;
-    width: 90%; /* Slightly smaller than the parent */
-    height: 90%; /* Slightly smaller than the parent */
+    width: 100%; /* Slightly smaller than the parent */
+    height: 100%; /* Slightly smaller than the parent */
     backface-visibility: hidden; /* Hide the back face when flipped */
     display: flex;
     flex-direction: column;
@@ -459,5 +460,32 @@ header {
 
     .flashcard-content p {
         font-size: 16px; /* Smaller font size */
+    }
+}
+/* Flashcard Front and Back */
+
+
+/* Flashcard Content */
+.flashcard-content {
+    width: 100%;
+    max-height: 100%; /* Limit to container height */
+    overflow-y: auto; /* Enable scrolling only when needed */
+    padding: 10px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center; /* Center when content is small */
+    scrollbar-width: thin;
+}
+
+/* When content is larger than container */
+.flashcard-content.scrollable {
+    justify-content: flex-start; /* Align to top when scrolling needed */
+}
+
+/* Media Queries (keep your existing ones, just ensure consistency) */
+@media (max-width: 480px) {
+    .flashcard-content {
+        padding: 5px;
     }
 }
