@@ -461,3 +461,107 @@ header {
         font-size: 16px; /* Smaller font size */
     }
 }
+
+
+
+/* Quiz Progress and Timer Styles */
+#quiz-progress {
+    font-size: 1.2rem;
+    font-weight: bold;
+    margin-bottom: 10px;
+    text-align: center;
+}
+
+#quiz-timer {
+    font-size: 1.2rem;
+    font-weight: bold;
+    margin-bottom: 20px;
+    text-align: center;
+    padding: 8px;
+    background: #f0f0f0;
+    border-radius: 5px;
+}
+
+#time-display.warning {
+    color: #e74c3c;
+    animation: pulse 1s infinite;
+}
+
+@keyframes pulse {
+    0% { opacity: 1; }
+    50% { opacity: 0.5; }
+    100% { opacity: 1; }
+}
+
+/* Add to media queries for responsiveness */
+@media (max-width: 480px) {
+    #quiz-progress, #quiz-timer {
+        font-size: 1rem;
+    }
+}
+
+/* Add to your style.css */
+.timing-stats {
+    background: #f8f9fa;
+    padding: 15px;
+    border-radius: 8px;
+    margin: 15px 0;
+}
+
+.timing-stats ul {
+    list-style: none;
+    padding: 0;
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+    gap: 8px;
+}
+
+.timing-stats li {
+    padding: 5px;
+    border-radius: 4px;
+    text-align: center;
+}
+
+.fast-time {
+    background-color: #d4edda;
+    color: #155724;
+}
+
+.slow-time {
+    background-color: #f8d7da;
+    color: #721c24;
+}
+
+
+/* Makes the last button in container sticky */
+.container > button.quiz-btn:last-child {
+    position: fixed;
+    bottom: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 90%;
+    max-width: 600px;
+    z-index: 100;
+    padding: 12px;
+    margin: 0 auto;
+    box-shadow: 0 0 15px rgba(0,0,0,0.2);
+    animation: fadeIn 0.3s ease-out;
+}
+
+/* Ensure content doesn't hide behind sticky button */
+.container {
+    padding-bottom: 80px !important;
+}
+
+/* Mobile responsiveness */
+@media (max-width: 768px) {
+    .container > button.quiz-btn:last-child {
+        width: 90%;
+        bottom: 10px;
+    }
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateX(-50%) translateY(20px); }
+    to { opacity: 1; transform: translateX(-50%) translateY(0); }
+}
