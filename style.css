@@ -150,10 +150,29 @@ header {
     color: white;
 }
 
-.button-quiz {
+/* .button-quiz {
     margin-top: 10px;
-}
-
+} */
+.button-quiz {
+            padding: 0.4rem;
+            border-radius: 5px;
+            background: #4CAF50;
+            color: white;
+            border: none;
+            cursor: pointer;
+            margin-top: 1rem;
+            display: block;
+            width: 100%;
+            text-align: center;
+        }
+        @media (max-width: 600px) {
+            .button-quiz {
+                width: auto;
+                display: inline-block;
+                font-size: 14px;
+                padding: 0.3rem;
+            }
+        }
 /* Quiz Navigation Buttons */
 .quiz-btn {
     background: #27ae60;
