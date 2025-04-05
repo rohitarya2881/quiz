@@ -1,38 +1,43 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Quiz Manager</title>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.5.1/dist/confetti.browser.min.js"></script>
-    <link rel="stylesheet" href="style.css">
-    <script src="script.js" defer></script>
+    <link rel="stylesheet" href="style1.css">
+    <script src="script2.js" defer></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Poppins:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap" rel="stylesheet">
 
 </head>
+
 <body>
 
     <!-- Header -->
     <header>
-        
-            <div class="header-container">
-              <!-- Left-aligned items -->
-              <div class="header-left">
+
+        <div class="header-container">
+            <!-- Left-aligned items -->
+            <div class="header-left">
                 <button id="toggle-header-btn" onclick="toggleMenu()">☰</button>
-              </div>
-              
-              <!-- Center-aligned items (folder select) -->
-             
-              <!-- Right-aligned items (medals and home button) -->
-              <div class="header-right">
-                <div id="medal-display" class="medal-display">
-                  <span class="medal bronze" title="Daily Streak Medals">🥉: <span id="bronze-count">0</span></span>
-                  <span class="medal silver" title="Weekly Streak Medals">🥈: <span id="silver-count">0</span></span>
-                  <span class="medal gold" title="Monthly Streak Medals">🥇: <span id="gold-count">0</span></span>
-                </div>
-              </div>
             </div>
-          
+
+            <!-- Center-aligned items (folder select) -->
+
+            <!-- Right-aligned items (medals and home button) -->
+            <div class="header-right">
+                <div id="medal-display" class="medal-display">
+                    <span class="medal bronze" title="Daily Streak Medals">🥉: <span id="bronze-count">0</span></span>
+                    <span class="medal silver" title="Weekly Streak Medals">🥈: <span id="silver-count">0</span></span>
+                    <span class="medal gold" title="Monthly Streak Medals">🥇: <span id="gold-count">0</span></span>
+                </div>
+            </div>
+        </div>
+
         <!-- Folder Selection -->
         <select id="folderSelect" onchange="selectFolder()">
             <option value="" disabled selected>Select a folder</option>
@@ -50,8 +55,10 @@
         <button id="close-menu-btn" onclick="toggleMenu()">&times;</button>
         <h3>Quiz Management</h3>
         <button class="button-quiz" onclick="createFolder()">Create Folder</button>
-        <button class="button-quiz" onclick="document.getElementById('jsonFileInputUpload').click()">Upload Quiz JSON</button>
-        <button class="button-quiz" onclick="document.getElementById('jsonFileInputRestore').click()">Restore Data</button>
+        <button class="button-quiz" onclick="document.getElementById('jsonFileInputUpload').click()">Upload Quiz
+            JSON</button>
+        <button class="button-quiz" onclick="document.getElementById('jsonFileInputRestore').click()">Restore
+            Data</button>
         <button class="button-quiz" onclick="downloadData()">Download Memory</button>
         <button class="button-quiz" onclick="toggleTheme()">Toggle Theme</button>
         <button class="button-quiz" onclick="shuffleQuiz()">Shuffle Quiz</button>
@@ -59,9 +66,11 @@
         <button class="button-quiz" onclick="clearAndRefresh()">Reset All Data</button>
         <button class="button-quiz" onclick="showAnalysis()">Quiz Analysis</button>
         <button class="button-quiz" onclick="showFlashcards()">Flashcards</button>
-        <input type="file" id="jsonFileInputUpload" style="display: none;" accept=".json" onchange="handleFileUpload(event)">
-        <input type="file" id="jsonFileInputRestore" style="display: none;" accept=".json" onchange="restoreData(event)">
-    </div> 
+        <input type="file" id="jsonFileInputUpload" style="display: none;" accept=".json"
+            onchange="handleFileUpload(event)">
+        <input type="file" id="jsonFileInputRestore" style="display: none;" accept=".json"
+            onchange="restoreData(event)">
+    </div>
 
     <!-- Main Quiz Area -->
     <div class="container">
@@ -73,13 +82,14 @@
                 <label>End Index: <input type="number" id="endIndex" min="1" value="1"></label>
             </div>
         </div>
-        <button id="showDifficultBtn" class="quiz-btn" onclick="showDifficultQuestions()">Show Difficult Questions</button>
+        <button id="showDifficultBtn" class="quiz-btn" onclick="showDifficultQuestions()">Show Difficult
+            Questions</button>
 
         <div id="quizOptions" class="hidden">
             <button class="quiz-btn" onclick="startQuiz('complete')">Complete Quiz</button>
             <button class="quiz-btn" onclick="startQuiz('difficult')">Difficult Part</button>
         </div>
-        
+
         <div id="quizContainer" class="container hidden">
             <div id="quiz-progress">
                 <span id="current-question">1</span> / <span id="total-questions">0</span>
@@ -97,14 +107,14 @@
     <!-- Analysis Container -->
     <div id="analysisContainer" class="container hidden">
         <h2>Quiz Analysis</h2>
-        
+
         <div class="analysis-controls">
             <select id="analysisFolderSelect" onchange="updateAnalysisForFolder()">
                 <option value="all">All Folders</option>
             </select>
             <button class="quiz-btn" onclick="goHome()">Back to Home</button>
         </div>
-        
+
         <div class="analysis-section">
             <h3>Current Progress</h3>
             <div class="stat-grid" id="progressStats"></div>
@@ -112,21 +122,21 @@
                 <div id="progressBar" class="progress-bar"></div>
             </div>
         </div>
-        
+
         <div class="analysis-section">
             <h3>Daily Goal</h3>
-            <label>Questions to complete today: 
+            <label>Questions to complete today:
                 <input type="number" id="dailyGoalInput" min="1" value="10">
             </label>
             <button class="quiz-btn" onclick="setDailyGoal()">Set Goal</button>
             <div id="goalProgress"></div>
         </div>
-        
+
         <div class="analysis-section">
             <h3>Recent Performance</h3>
             <canvas id="performanceChart" width="400" height="200"></canvas>
         </div>
-        
+
         <div class="analysis-section">
             <h3>Question Difficulty Distribution</h3>
             <div class="chart-container">
@@ -137,7 +147,7 @@
             <h3>Historical Progress</h3>
             <canvas id="historicalProgressChart" width="400" height="200"></canvas>
         </div>
-        
+
         <div class="analysis-section">
             <h3>Achievements</h3>
             <div id="achievementsList" class="stat-grid"></div>
@@ -148,31 +158,41 @@
 
     <footer>
         <div class="footer-container">
-          <div class="footer-section">
-            <h4>Quiz Manager</h4>
-            <p>Enhance your learning experience with interactive quizzes and flashcards.</p>
-          </div>
-          <div class="footer-section">
-            <h4>Quick Links</h4>
-            <ul>
-              <li><button class="footer-link" onclick="goHome()">Home</button></li>
-              <li><button class="footer-link" onclick="showAnalysis()">Analytics</button></li>
-              <li><button class="footer-link" onclick="showFlashcards()">Flashcards</button></li>
-            </ul>
-          </div>
-          <div class="footer-section">
-            <h4>Statistics</h4>
-            <div class="footer-stats">
-              <span>🥉: <span id="footer-bronze">0</span></span>
-              <span>🥈: <span id="footer-silver">0</span></span>
-              <span>🥇: <span id="footer-gold">0</span></span>
+            <div class="footer-section">
+                <h4>Quiz Manager</h4>
+                <p>Enhance your learning experience with interactive quizzes and flashcards.</p>
             </div>
-          </div>
+            <div class="footer-section">
+                <h4>Frequent Folders</h4>
+                <ul id="frequentFolders">
+                  <!-- Will be populated by JavaScript -->
+                </ul>
+              </div>
+            <div class="footer-section">
+                <h4>Quick Links</h4>
+                <ul>
+                    <li><button class="footer-link" onclick="goHome()">Home</button></li>
+                    <li><button class="footer-link" onclick="showAnalysis()">Analytics</button></li>
+                    <li><button class="footer-link" onclick="showFlashcards()">Flashcards</button></li>
+                </ul>
+            </div>
+            <div class="footer-section">
+                <h4>Statistics</h4>
+                <div class="footer-stats">
+                    <span>🥉: <span id="footer-bronze">0</span></span>
+                    <span>🥈: <span id="footer-silver">0</span></span>
+                    <span>🥇: <span id="footer-gold">0</span></span>
+                </div>
+            </div>
+            
         </div>
         <div class="footer-bottom">
-          <p>© <span id="current-year"></span> Quiz Manager App. All rights reserved.</p>
+            <p>© <span id="current-year"></span> Quiz Manager App. All rights reserved.</p>
         </div>
-      </footer>
-      <button class="back-to-top" onclick="window.scrollTo({top: 0, behavior: 'smooth'})">↑</button>
+        <!-- Add this to your footer section in index.html -->
+
+    </footer>
+    <button class="back-to-top" onclick="window.scrollTo({top: 0, behavior: 'smooth'})">↑</button>
 </body>
+
 </html>
