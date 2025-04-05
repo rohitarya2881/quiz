@@ -10,6 +10,9 @@ let quizMode = ""; // Tracks the current quiz mode (e.g., "complete" or "difficu
 let questionStartTime = 0;
 let questionTimes = []; // Array to store time taken for each question
 let totalQuizTime = 0;
+// Add to your global variables
+let flashcardInterval = null;
+let flashcardStartTime = 0;
 // Initialize IndexedDB
 // Update the initDB function in script.js
 function initDB() {
@@ -452,54 +455,25 @@ async function showResults() {
   }
 }
 
-function triggerHighAccuracyCelebration() {
-  // Fireworks effect
-  playCelebrationSound();
-
-  const duration = 3000;
-  const animationEnd = Date.now() + duration;
-  const defaults = { startVelocity: 30, spread: 360, ticks: 60, zIndex: 1000 };
-
-  function randomInRange(min, max) {
-    return Math.random() * (max - min) + min;
-  }
-
-  const interval = setInterval(function() {
-    const timeLeft = animationEnd - Date.now();
-
-    if (timeLeft <= 0) {
-      return clearInterval(interval);
+function triggerFlashcardMilestoneCelebration(milestone) {
+  try {
+    if (!milestone) return;
+    
+    // Gentle confetti for milestones
+    if (milestone.confetti) {
+      confetti({
+        particleCount: 100,
+        spread: 70,
+        origin: { y: 0.6 },
+        colors: ['#4a6fa5', '#2ecc71', '#3498db', '#f1c40f'],
+        scalar: 0.8
+      });
     }
 
-    const particleCount = 50 * (timeLeft / duration);
-    confetti({
-      ...defaults,
-      particleCount,
-      origin: { x: randomInRange(0.1, 0.3), y: Math.random() - 0.2 }
-    });
-    confetti({
-      ...defaults,
-      particleCount,
-      origin: { x: randomInRange(0.7, 0.9), y: Math.random() - 0.2 }
-    });
-  }, 250);
-
-  // Floating trophy animation
-  const trophy = document.createElement('div');
-  trophy.innerHTML = '🏆';
-  trophy.style.position = 'fixed';
-  trophy.style.fontSize = '100px';
-  trophy.style.left = '50%';
-  trophy.style.top = '50%';
-  trophy.style.transform = 'translate(-50%, -50%) scale(0)';
-  trophy.style.zIndex = '1001';
-  trophy.style.textShadow = '0 0 10px gold';
-  trophy.style.animation = 'trophyRise 2s forwards';
-  document.body.appendChild(trophy);
-
-  setTimeout(() => {
-    trophy.remove();
-  }, 2000);
+    // ... rest of the function ...
+  } catch (e) {
+    console.error("Error in milestone celebration:", e);
+  }
 }
 
 
@@ -2648,9 +2622,9 @@ function checkRealTimeMedals(folderName, currentStudyTime) {
   
   const today = new Date().toISOString().split('T')[0];
   const medalThresholds = [
-    { type: 'bronze', threshold: 1800, awarded: flashcardStudyMedals[folderName].bronze === today },
-    { type: 'silver', threshold: 3600, awarded: flashcardStudyMedals[folderName].silver === today },
-    { type: 'gold', threshold: 7200, awarded: flashcardStudyMedals[folderName].gold === today } //7200
+    { type: 'bronze', threshold: 1850, awarded: flashcardStudyMedals[folderName].bronze === today },  // 30 minutes
+    { type: 'silver', threshold: 3650, awarded: flashcardStudyMedals[folderName].silver === today },  // 1 hour
+    { type: 'gold', threshold: 7300, awarded: flashcardStudyMedals[folderName].gold === today }       // 2 hours
   ];
   
   medalThresholds.forEach(({ type, threshold, awarded }) => {
@@ -2662,7 +2636,6 @@ function checkRealTimeMedals(folderName, currentStudyTime) {
   
   localStorage.setItem('flashcardStudyMedals', JSON.stringify(flashcardStudyMedals));
 }
-
 
 function checkFlashcardMilestones(currentTime) {
   // Find all milestones we've passed but haven't celebrated yet
@@ -2866,7 +2839,28 @@ const FLASHCARD_MEDAL_THRESHOLDS = {
   silver: 3600,  // 1 hour
   gold: 7200     // 2 hours
 };
-
+function startFlashcardTimer() {
+  flashcardStartTime = Date.now();
+  flashcardInterval = setInterval(() => {
+    const currentTime = Math.floor((Date.now() - flashcardStartTime) / 1000);
+    
+    // Update current folder's study time
+    const today = new Date().toISOString().split('T')[0];
+    if (!flashcardDailyStudyTime[today]) {
+      flashcardDailyStudyTime[today] = {};
+    }
+    if (!flashcardDailyStudyTime[today][currentFolder]) {
+      flashcardDailyStudyTime[today][currentFolder] = 0;
+    }
+    flashcardDailyStudyTime[today][currentFolder] = currentTime;
+    
+    // Check for milestones and medals
+    checkFlashcardMilestones(currentTime);
+    checkRealTimeMedals(currentFolder, currentTime);
+    
+    localStorage.setItem('flashcardDailyStudyTime', JSON.stringify(flashcardDailyStudyTime));
+  }, 1000);
+}
 // Add this function to start tracking flashcard study time
 function startFlashcardStudySession(folderName) {
   if (!folderName) return;
