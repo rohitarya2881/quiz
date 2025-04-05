@@ -7,7 +7,10 @@ body {
     color: #333;
     transition: background-color 0.3s, color 0.3s;
 }
+*{
+      -webkit-tap-highlight-color: transparent;
 
+}
 body.dark-theme {
     background-color: #010409;
     color: rgba(255, 255, 255, 0.8);
