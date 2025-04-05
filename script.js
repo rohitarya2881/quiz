@@ -606,7 +606,7 @@ function showFlashcards() {
     if (Math.random() > 0.7) { // 30% chance to show
       showRandomEncouragement();
     }
-  }, 30000); // Every 30 seconds
+  }, 150000); // Every 30 seconds
   startFlashcardStudySession(currentFolder);
 
 }
