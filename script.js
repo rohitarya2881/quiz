@@ -2650,7 +2650,7 @@ function checkRealTimeMedals(folderName, currentStudyTime) {
   const medalThresholds = [
     { type: 'bronze', threshold: 1800, awarded: flashcardStudyMedals[folderName].bronze === today },
     { type: 'silver', threshold: 3600, awarded: flashcardStudyMedals[folderName].silver === today },
-    { type: 'gold', threshold: 7200, awarded: flashcardStudyMedals[folderName].gold === today }
+    { type: 'gold', threshold: 10, awarded: flashcardStudyMedals[folderName].gold === today } //7200
   ];
   
   medalThresholds.forEach(({ type, threshold, awarded }) => {
