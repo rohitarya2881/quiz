@@ -2985,3 +2985,74 @@ function awardFlashcardMedal(medalType, folderName) {
     }, 1000);
   }
 }
+
+
+
+//testing 
+function showRandomEncouragement() {
+  const messages = [
+  { text: "You're doing great! 👍", emoji: "✨" },
+  { text: "Knowledge is power! 💪", emoji: "🧠" },
+  { text: "Every minute counts! ⏱️", emoji: "🌟" },
+  { text: "One step at a time! 👣", emoji: "🚀" },
+  { text: "Stay curious, stay sharp! 🧐", emoji: "🔍" },
+  { text: "Keep pushing forward! ➡️", emoji: "🔥" },
+  { text: "You're on the right path! 🛤️", emoji: "✅" },
+  { text: "Big things start small! 🌱", emoji: "🌈" },
+  { text: "Consistency is key! 🔑", emoji: "📆" },
+  { text: "Believe in yourself! 💖", emoji: "🌠" },
+  { text: "Almost there, keep it up! ⛰️", emoji: "🏁" },
+  { text: "Smash your goals! 🎯", emoji: "💥" },
+  { text: "Focus mode: ON 🧘‍♂️", emoji: "🛡️" },
+  { text: "Progress over perfection! 🛠️", emoji: "📈" },
+  { text: "Dream big, start now! 🌌", emoji: "💫" },
+  { text: "Hard work pays off! 🏋️", emoji: "🏆" },
+  { text: "You're unstoppable! 🏃‍♀️", emoji: "💨" },
+  { text: "Turn challenges into victories! 🧗", emoji: "🪄" },
+  { text: "You got this! 🙌", emoji: "🎉" },
+  { text: "Make today count! 📅", emoji: "🌞" },
+  { text: "Learning never stops! 📚", emoji: "🧭" },
+  { text: "Dedication leads to success! 🎓", emoji: "🥇" },
+  { text: "Stay focused, stay winning! 🎮", emoji: "🥳" },
+  { text: "One more push! 💼", emoji: "🚴" },
+  { text: "Break time? You've earned it! ☕", emoji: "💤" },
+  { text: "Level up your mind! 🧠", emoji: "🆙" },
+  { text: "Greatness takes time ⏳", emoji: "🛤️" },
+  { text: "Effort never goes unnoticed! 👀", emoji: "📣" },
+  { text: "Keep shining bright! 💡", emoji: "🌟" },
+  { text: "You’re building your future! 🏗️", emoji: "🧱" },
+  { text: "Finish strong! 🏁", emoji: "⚡" },
+  { text: "Rise. Grind. Repeat. 🔁", emoji: "🏋️‍♂️" },
+  { text: "Brains + Hustle = Magic! ✨", emoji: "🧙" },
+  { text: "Success starts with action! 🏃", emoji: "💡" }
+];
+
+  const msg = messages[Math.floor(Math.random() * messages.length)];
+  
+  const bubble = document.createElement('div');
+  bubble.innerHTML = `
+    <div style="
+      position: fixed;
+      bottom: 20px;
+      right: 20px;
+      background: rgba(255,255,255,0.9);
+      color: #333;
+      padding: 10px 15px;
+      border-radius: 20px;
+      font-size: 0.9em;
+      z-index: 999;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      animation: fadeInOut 3s forwards;
+    ">
+      <span style="font-size: 1.2em;">${msg.emoji}</span>
+      ${msg.text}
+    </div>
+  `;
+  document.body.appendChild(bubble);
+  
+  setTimeout(() => bubble.remove(), 3000);
+}
+
