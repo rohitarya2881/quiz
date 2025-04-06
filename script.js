@@ -577,10 +577,10 @@ function showFlashcards() {
     flashcardContainer.appendChild(flashcard);
   });
   encouragementInterval = setInterval(() => {
-    if (Math.random() > 0.4) { // 30% chance to show
+    if (Math.random() > 0.3) { // 30% chance to show
       showRandomEncouragement();
     }
-  }, 150000); // Every 30 seconds
+  }, 140000); // Every 30 seconds
   startFlashcardStudySession(currentFolder);
 
 }
