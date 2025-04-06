@@ -3050,3 +3050,52 @@ function showRandomEncouragement() {
   setTimeout(() => bubble.remove(), 3000);
 }
 
+function triggerHighAccuracyCelebration() {
+  // Fireworks effect
+  playCelebrationSound();
+
+  const duration = 3000;
+  const animationEnd = Date.now() + duration;
+  const defaults = { startVelocity: 30, spread: 360, ticks: 60, zIndex: 1000 };
+
+  function randomInRange(min, max) {
+    return Math.random() * (max - min) + min;
+  }
+
+  const interval = setInterval(function() {
+    const timeLeft = animationEnd - Date.now();
+
+    if (timeLeft <= 0) {
+      return clearInterval(interval);
+    }
+
+    const particleCount = 50 * (timeLeft / duration);
+    confetti({
+      ...defaults,
+      particleCount,
+      origin: { x: randomInRange(0.1, 0.3), y: Math.random() - 0.2 }
+    });
+    confetti({
+      ...defaults,
+      particleCount,
+      origin: { x: randomInRange(0.7, 0.9), y: Math.random() - 0.2 }
+    });
+  }, 250);
+
+  // Floating trophy animation
+  const trophy = document.createElement('div');
+  trophy.innerHTML = '🏆';
+  trophy.style.position = 'fixed';
+  trophy.style.fontSize = '100px';
+  trophy.style.left = '50%';
+  trophy.style.top = '50%';
+  trophy.style.transform = 'translate(-50%, -50%) scale(0)';
+  trophy.style.zIndex = '1001';
+  trophy.style.textShadow = '0 0 10px gold';
+  trophy.style.animation = 'trophyRise 2s forwards';
+  document.body.appendChild(trophy);
+
+  setTimeout(() => {
+    trophy.remove();
+  }, 2000);
+}
