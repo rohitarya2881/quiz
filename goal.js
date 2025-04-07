@@ -13,7 +13,7 @@ function setFolderGoals() {
     let selectedFolders = [];
     let questionsPerDay = 10;
     
-    // Create dialog for folder selection
+    // Create dialog for folder selectionnnn
     const dialog = document.createElement('div');
     dialog.style.position = 'fixed';
     dialog.style.top = '0';
