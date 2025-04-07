@@ -2449,8 +2449,11 @@ document.addEventListener("DOMContentLoaded", async () => {
     checkMissedDays();
     
     // Set theme
-    const savedTheme = localStorage.getItem("quizTheme");
-    document.body.classList.toggle("dark-theme", savedTheme === "dark" || savedTheme === null);
+       const savedTheme = localStorage.getItem("quizTheme");
+    if (savedTheme === "dark") {
+      document.body.classList.add("dark-theme");
+    }
+    
     
     // Set current year
     const yearElement = document.getElementById('current-year');
