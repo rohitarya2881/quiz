@@ -2447,7 +2447,6 @@ document.addEventListener("DOMContentLoaded", async () => {
     updateMedalDisplay();
     checkBirthday();
     checkMissedDays();
-    initializeGoalTracking() 
     // Set theme
        const savedTheme = localStorage.getItem("quizTheme");
     if (savedTheme === "dark") {
