@@ -213,7 +213,17 @@ function startGoalQuiz(folder) {
     // Scroll to quiz section
     document.querySelector('.container').scrollIntoView({ behavior: 'smooth' });
 }
-// Track goal progress when quiz is completed
+
+
+
+
+
+
+
+// Global variables for goal tracking
+
+// [Previous functions like setFolderGoals, updateGoalDisplay, etc. remain the same until trackGoalProgress]
+
 function trackGoalProgress(correctAnswers, totalQuestions) {
     const today = new Date().toISOString().split('T')[0];
     
@@ -237,39 +247,27 @@ function trackGoalProgress(correctAnswers, totalQuestions) {
 
     // Update folder goals if they exist
     if (folderGoals[currentFolder]) {
-        // Update completedToday in folderGoals
         folderGoals[currentFolder].completedToday = 
             (folderGoals[currentFolder].completedToday || 0) + questionsCompleted;
         
-        // Update the lastIndex to move forward in the question list
         folderGoals[currentFolder].lastIndex += questionsCompleted;
         
-        // Save to localStorage (both objects)
         localStorage.setItem('folderGoals', JSON.stringify(folderGoals));
         localStorage.setItem('dailyProgress', JSON.stringify(dailyProgress));
     }
 
-    // Update UI
     updateGoalDisplay();
     renderConsistencyCalendar();
     updateFooterGoals();
 }
-// Render GitHub-like consistency calendar
+
 function renderConsistencyCalendar() {
     const calendarContainer = document.getElementById('consistencyCalendar');
     if (!calendarContainer) return;
 
-    // Load data with proper fallbacks
     const folderGoals = JSON.parse(localStorage.getItem('folderGoals')) || {};
     const dailyProgress = JSON.parse(localStorage.getItem('dailyProgress')) || {};
 
-    // Debug: Verify data loading
-    console.group("[Calendar] Data Verification");
-    console.log("Folder Goals:", folderGoals);
-    console.log("Daily Progress:", dailyProgress);
-    console.groupEnd();
-
-    // Clear previous calendar
     calendarContainer.innerHTML = '';
 
     // Date range setup (last 6 months)
@@ -293,16 +291,18 @@ function renderConsistencyCalendar() {
     
     let calendarHTML = `
         <div class="calendar-legend">
-            <span>Activity: 
+            <span>Goal Completion: 
                 <div class="legend-box intensity-1"></div>
                 <div class="legend-box intensity-2"></div>
                 <div class="legend-box intensity-3"></div>
                 <div class="legend-box intensity-4"></div>
+                (0-24%, 25-49%, 50-74%, 75-100%)
             </span>
             <span>Accuracy: 
                 <div class="legend-box low-accuracy"></div>
                 <div class="legend-box medium-accuracy"></div>
                 <div class="legend-box high-accuracy"></div>
+                (<50%, 50-79%, 80-100%)
             </span>
         </div>
         <div class="calendar-grid">
@@ -332,54 +332,54 @@ function renderConsistencyCalendar() {
             const currentDate = new Date(year, monthDate.getMonth(), day);
             const dateStr = currentDate.toISOString().split('T')[0];
             
-            // Fixed date comparison using normalized dates
             if (currentDate > todayMidnight) {
                 monthHTML += '<div class="day-cell future"></div>';
                 continue;
             }
 
             const dayData = calendarData[dateStr] || {};
-            let totalQuestions = 0;
-            let totalCorrect = 0;
             
-            // Calculate totals with number conversion
-            Object.values(dayData).forEach(folderData => {
-                totalQuestions += Number(folderData.completed) || 0;
-                totalCorrect += Number(folderData.correct) || 0;
-            });
-
-            // Determine intensity
-            const intensity = totalQuestions > 0 ? Math.min(4, Math.floor(totalQuestions / 5) + 1) : 0;
-            
-            // Determine accuracy
-            const accuracy = totalQuestions > 0 ? (totalCorrect / totalQuestions) * 100 : 0;
-            let accuracyClass = '';
-            if (accuracy >= 80) accuracyClass = 'high-accuracy';
-            else if (accuracy >= 50) accuracyClass = 'medium-accuracy';
-            else if (totalQuestions > 0) accuracyClass = 'low-accuracy';
-
-            // Check goal completion with proper validation
-            let goalMet = false;
+            // Calculate goal completion percentage
+            let completedGoals = 0;
             Object.keys(folderGoals).forEach(folder => {
                 const folderData = dayData[folder] || {};
                 const goalTarget = Number(folderGoals[folder]?.dailyQuestions) || 0;
                 const completed = Number(folderData.completed) || 0;
                 
                 if (completed >= goalTarget) {
-                    goalMet = true;
-                    console.debug(`Goal met on ${dateStr} for ${folder}:`, {
-                        completed: completed,
-                        required: goalTarget
-                    });
+                    completedGoals++;
                 }
             });
 
-            // Build day cell with all metadata
+            const totalGoals = Object.keys(folderGoals).length;
+            const completionRatio = totalGoals > 0 ? completedGoals / totalGoals : 0;
+            
+            // Determine intensity based on goal completion
+            let intensity = 0;
+            if (completionRatio >= 0.75) intensity = 4;
+            else if (completionRatio >= 0.5) intensity = 3;
+            else if (completionRatio >= 0.25) intensity = 2;
+            else if (completionRatio > 0) intensity = 1;
+
+            // Calculate accuracy
+            let totalQuestions = 0;
+            let totalCorrect = 0;
+            Object.values(dayData).forEach(folderData => {
+                totalQuestions += Number(folderData.completed) || 0;
+                totalCorrect += Number(folderData.correct) || 0;
+            });
+
+            const accuracy = totalQuestions > 0 ? (totalCorrect / totalQuestions) * 100 : 0;
+            let accuracyClass = '';
+            if (accuracy >= 80) accuracyClass = 'high-accuracy';
+            else if (accuracy >= 50) accuracyClass = 'medium-accuracy';
+            else if (totalQuestions > 0) accuracyClass = 'low-accuracy';
+
             monthHTML += `
-                <div class="day-cell intensity-${intensity} ${accuracyClass} ${goalMet ? 'goal-met' : ''}"
-                     title="${dateStr}: ${totalQuestions} question${totalQuestions !== 1 ? 's' : ''}
-                            (${totalCorrect} correct, ${accuracy.toFixed(1)}% accuracy)
-                            ${goalMet ? '✓ Daily goal achieved' : ''}">
+                <div class="day-cell intensity-${intensity} ${accuracyClass}"
+                     title="${dateStr}: 
+                            ${completedGoals}/${totalGoals} goals completed
+                            (${accuracy.toFixed(1)}% accuracy)">
                 </div>
             `;
         }
@@ -388,16 +388,14 @@ function renderConsistencyCalendar() {
         calendarHTML += monthHTML;
     }
 
-    calendarHTML += '</div>'; // Close calendar-grid
+    calendarHTML += '</div>';
     calendarContainer.innerHTML = calendarHTML;
-
-    // Final debug output
-    console.log("[Calendar] Render complete", {
-        renderedMonths: monthsToShow + 1,
-        firstDate: startDate.toISOString().split('T')[0],
-        lastDate: todayMidnight.toISOString().split('T')[0]
-    });
 }
+
+// [Rest of the original functions remain unchanged]
+
+
+
 
 function checkForNewDay() {
     const today = new Date().toISOString().split('T')[0];
