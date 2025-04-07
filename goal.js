@@ -13,7 +13,7 @@ function setFolderGoals() {
     let selectedFolders = [];
     let questionsPerDay = 10;
     
-    // Create dialog for folder selectionnnn
+    // Create dialog for folder selection
     const dialog = document.createElement('div');
     dialog.style.position = 'fixed';
     dialog.style.top = '0';
@@ -166,6 +166,17 @@ function updateGoalDisplay() {
   // Update footer display
   updateFooterGoals();
 }
+function checkMissedDays() {
+    const today = new Date().toISOString().split('T')[0];
+    const lastActiveDate = localStorage.getItem('lastActiveDate') || today;
+    
+    // Only update if we have a new day
+    if (today !== lastActiveDate) {
+      // We don't penalize for missed days - ranges stay the same
+      localStorage.setItem('lastActiveDate', today);
+    }
+  }
+// Start quiz for a specific goal
 function startGoalQuiz(folder) {
     if (!folderGoals[folder]) return;
     
@@ -193,7 +204,7 @@ function startGoalQuiz(folder) {
     // Set the range inputs
     document.getElementById('folderSelect').value = folder;
     selectFolder();
-    document.getElementById('startIndex').value = start + 1; // +1 because UI is 1-based
+    document.getElementById('startIndex').value = start + 1;
     document.getElementById('endIndex').value = end;
     
     // Show quiz options
@@ -205,37 +216,14 @@ function startGoalQuiz(folder) {
 
 
 
+
+
+
+
 // Global variables for goal tracking
 
 // [Previous functions like setFolderGoals, updateGoalDisplay, etc. remain the same until trackGoalProgress]
-// Add this to your initialization code
-function initializeGoalTracking() {
-    try {
-        folderGoals = JSON.parse(localStorage.getItem('folderGoals')) || {};
-        dailyProgress = JSON.parse(localStorage.getItem('dailyProgress')) || {};
-        
-        // Validate and clean up data
-        Object.keys(folderGoals).forEach(folder => {
-            if (!quizzes[folder]) {
-                delete folderGoals[folder];
-            } else {
-                // Ensure all required fields exist
-                folderGoals[folder] = {
-                    dailyQuestions: folderGoals[folder].dailyQuestions || 10,
-                    completedToday: folderGoals[folder].completedToday || 0,
-                    lastIndex: folderGoals[folder].lastIndex || 0,
-                    mastery: folderGoals[folder].mastery || { currentStreak: 0, requiredStreak: 2 }
-                };
-            }
-        });
-        
-        localStorage.setItem('folderGoals', JSON.stringify(folderGoals));
-    } catch (e) {
-        console.error("Error initializing goal tracking:", e);
-        folderGoals = {};
-        dailyProgress = {};
-    }
-}
+
 function trackGoalProgress(correctAnswers, totalQuestions) {
     const today = new Date().toISOString().split('T')[0];
     
@@ -251,28 +239,18 @@ function trackGoalProgress(correctAnswers, totalQuestions) {
         };
     }
 
-    // Convert to numbers to ensure proper addition
+    // Update progress (using proper number conversion)
     const questionsCompleted = Number(totalQuestions);
-    const correct = Number(correctAnswers);
-
-    // Update progress
     dailyProgress[today][currentFolder].completed += questionsCompleted;
-    dailyProgress[today][currentFolder].correct += correct;
+    dailyProgress[today][currentFolder].correct += Number(correctAnswers);
     dailyProgress[today][currentFolder].attempts += 1;
 
     // Update folder goals if they exist
     if (folderGoals[currentFolder]) {
-        // Ensure we have a quiz to reference
-        const quiz = quizzes[currentFolder] || [];
-        const quizLength = quiz.length;
-        
-        // Update completed today
         folderGoals[currentFolder].completedToday = 
             (folderGoals[currentFolder].completedToday || 0) + questionsCompleted;
         
-        // Update lastIndex, wrapping around if needed
-        folderGoals[currentFolder].lastIndex = 
-            (folderGoals[currentFolder].lastIndex + questionsCompleted) % quizLength;
+        folderGoals[currentFolder].lastIndex += questionsCompleted;
         
         localStorage.setItem('folderGoals', JSON.stringify(folderGoals));
         localStorage.setItem('dailyProgress', JSON.stringify(dailyProgress));
@@ -282,6 +260,7 @@ function trackGoalProgress(correctAnswers, totalQuestions) {
     renderConsistencyCalendar();
     updateFooterGoals();
 }
+
 function renderConsistencyCalendar() {
     const calendarContainer = document.getElementById('consistencyCalendar');
     if (!calendarContainer) return;
