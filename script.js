@@ -2438,27 +2438,40 @@ document.addEventListener("DOMContentLoaded", async () => {
     // Load data
     await loadQuizzes();
     
+    // Initialize goal tracking variables properly
+    folderGoals = JSON.parse(localStorage.getItem('folderGoals')) || {};
+    dailyProgress = JSON.parse(localStorage.getItem('dailyProgress')) || {};
+    
     // Update UI components with null checks
     updateFolderList();
     updateMedalDisplay();
+    checkBirthday();
+    checkMissedDays();
     
     // Set theme
     const savedTheme = localStorage.getItem("quizTheme");
-    if (savedTheme === "dark") {
-      document.body.classList.add("dark-theme");
-    }
+    document.body.classList.toggle("dark-theme", savedTheme === "dark" || savedTheme === null);
     
-    // Safely set current year
+    // Set current year
     const yearElement = document.getElementById('current-year');
-    if (yearElement) {
-      yearElement.textContent = new Date().getFullYear();
-    } else {
-      console.warn("Element 'current-year' not found");
-    }
+    if (yearElement) yearElement.textContent = new Date().getFullYear();
+    
+    // Update goal-related components
+    updateGoalDisplay();
+    updateFooterGoals();
+    // At the start of your script.js or goal.js
+checkForNewDay();
+    // Render calendar after everything else is ready
+    setTimeout(() => {
+      try {
+        renderConsistencyCalendar();
+      } catch (err) {
+        console.error("Error rendering calendar:", err);
+      }
+    }, 100);
     
   } catch (error) {
     console.error("Initialization error details:", error);
-    alert(`Initialization failed: ${error.message}. Please refresh.`);
   }
 });
 const maxRetries = 3;
