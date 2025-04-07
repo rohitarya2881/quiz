@@ -241,3 +241,22 @@
     background-color: #40c057 !important; /* A soft green */
     border: 1px solid #2f9e44;
 }
+
+
+/* For Chrome, Edge, and Safari */
+#footerGoals::-webkit-scrollbar {
+  width: 5px;
+}
+
+#footerGoals::-webkit-scrollbar-track {
+  background: rgba(255, 255, 255, 0.1);
+}
+
+#footerGoals::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.3);
+  border-radius: 3px;
+}
+
+.dark-theme #footerGoals::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.2);
+}
