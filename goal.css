@@ -1,167 +1,162 @@
 /* Goal Tracking Styles */
 .goal-item {
-    display: flex;
-    align-items: center;
-    padding: 8px 12px;
-    margin: 5px 0;
-    background: rgba(255, 255, 255, 0.1);
-    border-radius: 4px;
-    cursor: pointer;
-    transition: background 0.2s;
+  display: flex;
+  align-items: center;
+  padding: 8px 12px;
+  margin: 5px 0;
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 4px;
+  cursor: pointer;
+  transition: background 0.2s;
 }
 
 .dark-theme .goal-item {
-    background: rgba(255, 255, 255, 0.05);
+  background: rgba(255, 255, 255, 0.05);
 }
 
 .goal-item:hover {
-    background: rgba(255, 255, 255, 0.2);
+  background: rgba(255, 255, 255, 0.2);
 }
 
 .goal-folder {
-    flex: 1;
-    font-weight: 500;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
+  flex: 1;
+  font-weight: 500;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .goal-progress-container {
-    width: 100px;
-    height: 8px;
-    background: rgba(255, 255, 255, 0.2);
-    border-radius: 4px;
-    margin: 0 10px;
-    overflow: hidden;
+  width: 100px;
+  height: 8px;
+  background: rgba(255, 255, 255, 0.2);
+  border-radius: 4px;
+  margin: 0 10px;
+  overflow: hidden;
 }
 
 .goal-progress-bar {
-    height: 100%;
-    background: linear-gradient(90deg, #4a6fa5, #5d8cc9);
-    transition: width 0.3s;
+  height: 100%;
+  background: linear-gradient(90deg, #4a6fa5, #5d8cc9);
+  transition: width 0.3s;
 }
 
 .goal-count {
-    font-size: 0.9em;
-    min-width: 50px;
-    text-align: right;
+  font-size: 0.9em;
+  min-width: 50px;
+  text-align: right;
 }
 
 /* Footer Goals Styles */
 #footerGoals {
-    list-style: none;
-    padding: 0;
-    margin: 0;
-    max-height: 150px;
-    overflow-y: auto;
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  max-height: 150px;
+  overflow-y: auto;
 }
 
 #footerGoals li {
-    margin-bottom: 5px;
+  margin-bottom: 5px;
 }
 
 #footerGoals .footer-link {
-    display: flex;
-    justify-content: space-between;
-    width: 100%;
-    text-align: left;
-    background: none;
-    border: none;
-    color: rgba(255, 255, 255, 0.8);
-    padding: 5px 0;
-    cursor: pointer;
+  display: flex;
+  justify-content: space-between;
+  width: 100%;
+  text-align: left;
+  background: none;
+  border: none;
+  color: rgba(255, 255, 255, 0.8);
+  padding: 5px 0;
+  cursor: pointer;
 }
 
 #footerGoals .footer-link:hover {
-    color: white;
-    text-decoration: underline;
+  color: white;
+  text-decoration: underline;
 }
 
 .goal-progress {
-    margin-left: 10px;
-    color: rgba(255, 255, 255, 0.6);
+  margin-left: 10px;
+  color: rgba(255, 255, 255, 0.6);
 }
 
 /* Calendar Styles */
 #consistencyCalendar {
-    margin-top: 20px;
-    overflow-x: auto;
-    padding-bottom: 20px;
+  margin-top: 20px;
+  overflow-x: auto;
+  padding-bottom: 20px;
 }
 
 .calendar-grid {
-    display: flex;
-    overflow-x: auto;
-    padding-bottom: 15px;
+  display: flex;
+  overflow-x: auto;
+  padding-bottom: 15px;
 }
 
 .day-labels {
-    display: flex;
-    flex-direction: column;
-    margin-right: 5px;
+  display: flex;
+  flex-direction: column;
+  margin-right: 5px;
 }
 
 .day-label {
-    height: 15px;
-    font-size: 10px;
-    margin-bottom: 5px;
-    color: #666;
-    text-align: right;
-    padding-right: 5px;
+  height: 15px;
+  font-size: 10px;
+  margin-bottom: 5px;
+  color: #666;
+  text-align: right;
+  padding-right: 5px;
 }
 
 .dark-theme .day-label {
-    color: #aaa;
+  color: #aaa;
 }
 
 .month-container {
-    display: flex;
-    flex-direction: column;
-    margin-right: 15px;
+  display: flex;
+  flex-direction: column;
+  margin-right: 15px;
 }
 
 .month-label {
-    font-size: 12px;
-    font-weight: bold;
-    margin-bottom: 5px;
-    text-align: center;
+  font-size: 12px;
+  font-weight: bold;
+  margin-bottom: 5px;
+  text-align: center;
 }
 
 .month-days {
-    display: grid;
-    grid-template-columns: repeat(7, 15px);
-    gap: 3px;
+  display: grid;
+  grid-template-columns: repeat(7, 15px);
+  gap: 3px;
 }
 
 .day-cell {
-    width: 15px;
-    height: 15px;
-    border-radius: 3px;
-    background: #ebedf0;
+  width: 15px;
+  height: 15px;
+  border-radius: 3px;
+  background: #ebedf0;
 }
 
 .dark-theme .day-cell {
-    background: #2d333b;
+  background: #2d333b;
 }
 
 .day-cell.empty {
-    visibility: hidden;
+  visibility: hidden;
 }
 
 .day-cell.future {
-    opacity: 0.3;
+  opacity: 0.3;
 }
 
 /* Intensity colors */
-.day-cell.intensity-1 { background: #ebedf0 !important; }
-.day-cell.intensity-2 { background: #9be9a8 !important; }
-.day-cell.intensity-3 { background: #40c463 !important; }
-.day-cell.intensity-4 { background: #30a14e !important; }
-
-.dark-theme .day-cell.intensity-1 { background: #ebedf0 !important; }
-.dark-theme .day-cell.intensity-2 { background: #9be9a8 !important; }
-.dark-theme .day-cell.intensity-3 { background: #40c463 !important; }
-.dark-theme .day-cell.intensity-4 { background: #30a14e !important; }
+.day-cell.intensity-1 { background:  #d6e2d8 !important; }
+.day-cell.intensity-2 { background: #93f7a4 !important; }
+.day-cell.intensity-3 { background: #26f360 !important; }
+.day-cell.intensity-4 { background: #d4af37 !important; }
 
 /* Accuracy borders */
 .day-cell.high-accuracy { box-shadow: inset 0 0 0 2px #2ecc71; }
@@ -170,35 +165,35 @@
 
 /* Goal met styles */
 .day-cell.goal-met {
-    position: relative;
-    overflow: visible;
-    background-color: #40c057 !important;
-    border: 1px solid #2f9e44;
+  position: relative;
+  overflow: visible;
+  background-color: #40c057 !important;
+  border: 1px solid #2f9e44;
 }
 
 .day-cell.goal-met::after {
-    content: '★';
-    position: absolute;
-    top: -5px;
-    right: -5px;
-    font-size: 10px;
-    color: gold;
-    text-shadow: 0 0 2px rgba(0, 0, 0, 0.5);
+  content: '★';
+  position: absolute;
+  top: -5px;
+  right: -5px;
+  font-size: 10px;
+  color: gold;
+  text-shadow: 0 0 2px rgba(0, 0, 0, 0.5);
 }
 
 /* Calendar Legend */
 .calendar-legend {
-    display: flex;
-    justify-content: flex-end;
-    margin-bottom: 10px;
-    font-size: 12px;
-    color: #666;
+  display: flex;
+  justify-content: flex-end;
+  margin-bottom: 10px;
+  font-size: 12px;
+  color: #666;
 }
 
 .calendar-legend .legend-box {
-    display: inline-block;
-    width: 12px;
-    height: 12px;
-    margin: 0 2px;
-    border-radius: 2px;
+  display: inline-block;
+  width: 12px;
+  height: 12px;
+  margin: 0 2px;
+  border-radius: 2px;
 }
