@@ -9,6 +9,11 @@
     <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.5.1/dist/confetti.browser.min.js"></script>
     <link rel="stylesheet" href="style.css">
     <script src="script.js" defer></script>
+    <script src="birth.js" defer></script>
+    <link rel="stylesheet" href="birth.css">
+    <script src="goal.js" defer></script>
+    <link rel="stylesheet" href="goal.css">
+
     <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Poppins:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap" rel="stylesheet">
@@ -54,6 +59,7 @@
     <div id="mobile-menu">
         <button id="close-menu-btn" onclick="toggleMenu()">&times;</button>
         <h3>Quiz Management</h3>
+        <button class="button-quiz" onclick="setFolderGoals()">Set Folder Goals</button>
         <button class="button-quiz" onclick="createFolder()">Create Folder</button>
         <button class="button-quiz" onclick="document.getElementById('jsonFileInputUpload').click()">Upload Quiz
             JSON</button>
@@ -152,6 +158,11 @@
             <h3>Achievements</h3>
             <div id="achievementsList" class="stat-grid"></div>
         </div>
+        <div class="analysis-section">
+            <h3>Consistency Calendar</h3>
+            <div id="consistencyCalendar">
+                <div id="calendarPlaceholder">Loading consistency data...</div>
+              </div>          </div>
     </div>
 
 
@@ -174,8 +185,16 @@
                     <li><button class="footer-link" onclick="goHome()">Home</button></li>
                     <li><button class="footer-link" onclick="showAnalysis()">Analytics</button></li>
                     <li><button class="footer-link" onclick="showFlashcards()">Flashcards</button></li>
+                    <li><button class="footer-link" onclick="setFolderGoals()">Set Folder  Goals</button></li>
+
                 </ul>
             </div>
+            <div class="footer-section">
+                <h4>Active Goals</h4>
+                <ul id="footerGoals">
+                  <!-- Will be populated by JavaScript -->
+                </ul>
+              </div>
             <div class="footer-section">
                 <h4>Statistics</h4>
                 <div class="footer-stats">
