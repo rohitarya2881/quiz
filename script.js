@@ -16,42 +16,24 @@ let flashcardStartTime = 0;
 // Initialize IndexedDB
 // Update the initDB function in script.js
 function initDB() {
-    return new Promise((resolve, reject) => {
-    const request = indexedDB.open("QuizManagerDB", 3); // Increment version to 3
+  return new Promise((resolve, reject) => {
+    const request = indexedDB.open("QuizManagerDB", 3);
 
     request.onupgradeneeded = (event) => {
       const db = event.target.result;
-if (!db.objectStoreNames.contains("goalTracking")) {
+      if (!db.objectStoreNames.contains("goalTracking")) {
         const goalStore = db.createObjectStore("goalTracking", { keyPath: "id" });
         goalStore.createIndex("type", "type", { unique: false });
       }
-    };
-
-    request.onsuccess = (event) => {
-      db = event.target.result;
-      resolve(db);
-    };
-
-    request.onerror = (event) => {
-      console.error("IndexedDB error:", event.target.error);
-      reject(event.target.error);
-    };
-  });
-
-      // Create quizzes store if it doesn't exist
       if (!db.objectStoreNames.contains("quizzes")) {
         db.createObjectStore("quizzes", { keyPath: "folderName" });
       }
-
-      // Create analytics store
       if (!db.objectStoreNames.contains("analytics")) {
         const analyticsStore = db.createObjectStore("analytics", {
           keyPath: "id",
           autoIncrement: true,
         });
-        analyticsStore.createIndex("folderName", "folderName", {
-          unique: false,
-        });
+        analyticsStore.createIndex("folderName", "folderName", { unique: false });
         analyticsStore.createIndex("date", "date", { unique: false });
       }
     };
