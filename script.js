@@ -16,11 +16,27 @@ let flashcardStartTime = 0;
 // Initialize IndexedDB
 // Update the initDB function in script.js
 function initDB() {
-  return new Promise((resolve, reject) => {
-    const request = indexedDB.open("QuizManagerDB", 2); // Version 2
+    return new Promise((resolve, reject) => {
+    const request = indexedDB.open("QuizManagerDB", 3); // Increment version to 3
 
     request.onupgradeneeded = (event) => {
       const db = event.target.result;
+if (!db.objectStoreNames.contains("goalTracking")) {
+        const goalStore = db.createObjectStore("goalTracking", { keyPath: "id" });
+        goalStore.createIndex("type", "type", { unique: false });
+      }
+    };
+
+    request.onsuccess = (event) => {
+      db = event.target.result;
+      resolve(db);
+    };
+
+    request.onerror = (event) => {
+      console.error("IndexedDB error:", event.target.error);
+      reject(event.target.error);
+    };
+  });
 
       // Create quizzes store if it doesn't exist
       if (!db.objectStoreNames.contains("quizzes")) {
@@ -2430,6 +2446,7 @@ function updateMedalDisplay() {
   }
 }
 // Add this to your DOMContentLoaded event
+// Update DOMContentLoaded event listener
 document.addEventListener("DOMContentLoaded", async () => {
   try {
     // Initialize database
@@ -2438,32 +2455,24 @@ document.addEventListener("DOMContentLoaded", async () => {
     // Load data
     await loadQuizzes();
     
-    // Initialize goal tracking variables properly
-    folderGoals = JSON.parse(localStorage.getItem('folderGoals')) || {};
-    dailyProgress = JSON.parse(localStorage.getItem('dailyProgress')) || {};
+    // Initialize goal tracking data
+    await initializeGoalData();
     
-    // Update UI components with null checks
+    // Update UI components
     updateFolderList();
     updateMedalDisplay();
     checkBirthday();
     checkMissedDays();
-    // Set theme
-       const savedTheme = localStorage.getItem("quizTheme");
-    if (savedTheme === "dark") {
-      document.body.classList.add("dark-theme");
-    }
     
-    
-    // Set current year
-    const yearElement = document.getElementById('current-year');
-    if (yearElement) yearElement.textContent = new Date().getFullYear();
+    // Set theme (keep using localStorage for this as it's small)
+    const savedTheme = localStorage.getItem("quizTheme");
+    document.body.classList.toggle("dark-theme", savedTheme === "dark" || savedTheme === null);
     
     // Update goal-related components
     updateGoalDisplay();
     updateFooterGoals();
-    // At the start of your script.js or goal.js
-checkForNewDay();
-    // Render calendar after everything else is ready
+    
+    // Render calendar
     setTimeout(() => {
       try {
         renderConsistencyCalendar();
@@ -2473,7 +2482,7 @@ checkForNewDay();
     }, 100);
     
   } catch (error) {
-    console.error("Initialization error details:", error);
+    console.error("Initialization error:", error);
   }
 });
 const maxRetries = 3;
