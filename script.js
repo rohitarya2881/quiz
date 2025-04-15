@@ -536,14 +536,17 @@ function showFlashcards() {
   // Rest of your existing flashcard creation code...
   const questions = quizzes[currentFolder];
   
-  questions.forEach((question, index) => {
+   questions.forEach((question, index) => {
     const flashcard = document.createElement("div");
     flashcard.className = "flashcard";
     flashcard.innerHTML = `
       <div class="flashcard-inner">
         <div class="flashcard-front">
           <div class="flashcard-content">
-            <h3>Question ${index + 1}</h3>
+            <div class="flashcard-header">
+              <h3>Question ${index + 1}</h3>
+              <button class="edit-question-btn" data-index="${index}">✏️</button>
+            </div>
             <p>${question.question}</p>
             <p><strong>Options:</strong></p>
             <ul>
@@ -563,6 +566,7 @@ function showFlashcards() {
       </div>
     `;
 
+
     flashcard.addEventListener("click", () => {
       flashcard.classList.toggle("flipped");
     });
@@ -571,7 +575,11 @@ function showFlashcards() {
       const incorrectText = flashcard.querySelector(".flashcard-content p:last-child");
       incorrectText.classList.add("incorrect-attempt");
     }
-
+const editBtn = flashcard.querySelector('.edit-question-btn');
+    editBtn.addEventListener('click', (e) => {
+      e.stopPropagation(); // Prevent flip when clicking edit
+      showEditQuestionForm(index, question);
+    });
     flashcardContainer.appendChild(flashcard);
   });
   encouragementInterval = setInterval(() => {
@@ -583,6 +591,95 @@ function showFlashcards() {
 
 }
 
+
+
+
+
+function showEditQuestionForm(index, question) {
+  // Create modal overlay
+  const modal = document.createElement('div');
+  modal.className = 'edit-question-modal';
+  
+  // Create form with current values
+  modal.innerHTML = `
+    <div class="edit-question-form">
+      <h3>Edit Question</h3>
+      <form id="editQuestionForm">
+        <label>
+          Question Text:
+          <textarea name="question" required>${question.question}</textarea>
+        </label>
+        
+        <div class="options-container">
+          <label>Options:</label>
+          ${question.options.map((option, i) => `
+            <div class="option-row">
+              <input type="text" name="option${i}" value="${option}" required>
+              <input type="radio" name="correctIndex" value="${i}" ${i === question.correctIndex ? 'checked' : ''}>
+              <span>Correct</span>
+            </div>
+          `).join('')}
+        </div>
+        
+        <label>
+          Explanation:
+          <textarea name="explanation">${question.explanation || ''}</textarea>
+        </label>
+        
+        <div class="form-buttons">
+          <button type="submit" class="quiz-btn">Save</button>
+          <button type="button" class="quiz-btn cancel-btn">Cancel</button>
+        </div>
+      </form>
+    </div>
+  `;
+  
+  document.body.appendChild(modal);
+  
+  // Handle form submission
+  const form = modal.querySelector('#editQuestionForm');
+  form.addEventListener('submit', (e) => {
+    e.preventDefault();
+    
+    // Get form values
+    const formData = new FormData(form);
+    const updatedQuestion = {
+      question: formData.get('question'),
+      options: [],
+      correctIndex: parseInt(formData.get('correctIndex')),
+      explanation: formData.get('explanation') || '',
+      timesIncorrect: question.timesIncorrect || 0
+    };
+    
+    // Get all options
+    for (let i = 0; i < question.options.length; i++) {
+      updatedQuestion.options.push(formData.get(`option${i}`));
+    }
+    
+    // Update in memory
+    quizzes[currentFolder][index] = updatedQuestion;
+    
+    // Save to IndexedDB
+    saveQuizzes().then(() => {
+      // Refresh flashcards
+      showFlashcards();
+      // Close modal
+      modal.remove();
+    });
+  });
+  
+  // Handle cancel
+  modal.querySelector('.cancel-btn').addEventListener('click', () => {
+    modal.remove();
+  });
+  
+  // Close modal when clicking outside
+  modal.addEventListener('click', (e) => {
+    if (e.target === modal) {
+      modal.remove();
+    }
+  });
+}
 // Enhanced encouragement system with improved timing and context awareness
 let lastEncouragementTime = 0;
 let lastBreakReminder = 0;
