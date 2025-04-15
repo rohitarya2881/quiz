@@ -1540,3 +1540,101 @@ footer {
     -webkit-backface-visibility: hidden;
     will-change: transform;
 }
+
+
+
+
+
+
+
+
+
+/* Edit Question Modal */
+.edit-question-modal {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.5);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+}
+
+.edit-question-form {
+  background-color: white;
+  padding: 20px;
+  border-radius: 8px;
+  max-width: 600px;
+  width: 90%;
+  max-height: 90vh;
+  overflow-y: auto;
+}
+
+.edit-question-form h3 {
+  margin-top: 0;
+}
+
+.edit-question-form label {
+  display: block;
+  margin-bottom: 15px;
+}
+
+.edit-question-form textarea,
+.edit-question-form input[type="text"] {
+  width: 100%;
+  padding: 8px;
+  margin-top: 5px;
+  box-sizing: border-box;
+}
+
+.edit-question-form textarea {
+  min-height: 80px;
+}
+
+.options-container {
+  margin-bottom: 15px;
+}
+
+.option-row {
+  display: flex;
+  align-items: center;
+  margin-bottom: 8px;
+}
+
+.option-row input[type="text"] {
+  flex: 1;
+  margin-right: 10px;
+}
+
+.option-row input[type="radio"] {
+  margin-right: 5px;
+}
+
+.form-buttons {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+}
+
+/* Flashcard edit button */
+.flashcard-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.edit-question-btn {
+  background: none;
+  border: none;
+  font-size: 1.2em;
+  cursor: pointer;
+  padding: 5px;
+  margin-left: 10px;
+}
+
+.edit-question-btn:hover {
+  color: #4a6fa5;
+}
