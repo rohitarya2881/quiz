@@ -426,10 +426,8 @@ async function showResults() {
               }</p>
               <p><span style="color: green;">✔ Correct Answer:</span> ${
                 item.options[item.correctIndex]
-              }</p>
-              <p><strong>Explanation:</strong> ${
-                item.explanation || "No explanation provided."
-              }</p>
+              }  <p><strong>Explanation:</strong> ${formatExplanation(item.explanation)}</p>
+
               <hr>
           `;
       incorrectContainer.appendChild(div);
@@ -559,7 +557,7 @@ function showFlashcards() {
           <div class="flashcard-content">
             <h3>Answer</h3>
             <p><strong>Correct Answer:</strong> ${question.options[question.correctIndex]}</p>
-            <p><strong>Explanation:</strong> ${question.explanation || "No explanation provided."}</p>
+<p><strong>Explanation:</strong> ${formatExplanation(question.explanation)}</p>
             <p><strong>Times Incorrect:</strong> ${question.timesIncorrect || 0}</p>
           </div>
         </div>
@@ -3205,6 +3203,12 @@ function triggerHighAccuracyCelebration() {
 // Add this function to your script
 function formatExplanation(explanation) {
   if (!explanation) return "No explanation provided.";
-  // Replace newlines with <br> tags and preserve other whitespace
-  return explanation.replace(/\n/g, '<br>');
+  
+  // Replace newlines with <br> tags for HTML display
+  const formattedText = explanation
+    .replace(/\n/g, '<br>') // Convert \n to <br>
+    .replace(/\s{2,}/g, ' ') // Collapse multiple spaces
+    .trim(); // Remove leading/trailing whitespace
+  
+  return `<span class="explanation-text">${formattedText}</span>`;
 }
