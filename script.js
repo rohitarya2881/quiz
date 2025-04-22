@@ -3202,3 +3202,9 @@ function triggerHighAccuracyCelebration() {
     trophy.remove();
   }, 2000);
 }
+// Add this function to your script
+function formatExplanation(explanation) {
+  if (!explanation) return "No explanation provided.";
+  // Replace newlines with <br> tags and preserve other whitespace
+  return explanation.replace(/\n/g, '<br>');
+}
