@@ -1638,3 +1638,9 @@ footer {
 .edit-question-btn:hover {
   color: #4a6fa5;
 }
+
+.explanation-text {
+  display: inline-block; /* Ensures proper spacing */
+  line-height: 1.5; /* Improves readability */
+  white-space: pre-line; /* Preserves line breaks naturally */
+}
