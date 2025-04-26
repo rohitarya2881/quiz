@@ -431,10 +431,11 @@ async function selectAnswer(selectedIndex) {
     };
   }
   
- if (isCorrect) {
+  if (isCorrect) {
     score++;
     question.correctlyAnswered = true;
     
+    // If recalled correctly without options (🟢), remove from HardRecall if present
     if (recallMode && recallAttempts[currentQuestionIndex] === "🟢") {
       removeFromHardRecall(question);
     }
@@ -442,6 +443,8 @@ async function selectAnswer(selectedIndex) {
     question.timesIncorrect = (question.timesIncorrect || 0) + 1;
     question.selectedAnswer = question.options[selectedIndex];
     incorrectQuestions.push(question);
+    
+    // Always add to HardRecall if answered incorrectly
     addToHardRecall(question);
   }
   
@@ -460,36 +463,34 @@ function addToHardRecall(question) {
     quizzes[hardRecallFolder] = [];
   }
   
-  // Check if question already exists
-  const existingIndex = quizzes[hardRecallFolder].findIndex(q => 
-    q.question === question.question && 
-    q.options.join('|') === question.options.join('|')
+  // Create a clean copy of the question without temporary properties
+  const questionCopy = JSON.parse(JSON.stringify(question));
+  delete questionCopy.recallData;
+  delete questionCopy.correctlyAnswered;
+  delete questionCopy.selectedAnswer;
+  
+  // Check if question already exists in HardRecall
+  const exists = quizzes[hardRecallFolder].some(q => 
+    q.question === questionCopy.question && 
+    q.options.join('|') === questionCopy.options.join('|') &&
+    q.correctIndex === questionCopy.correctIndex
   );
   
-  if (existingIndex === -1) {
-    // Add new question to HardRecall
-    const questionCopy = JSON.parse(JSON.stringify(question));
-    delete questionCopy.recallData;
-    delete questionCopy.correctlyAnswered;
-    delete questionCopy.selectedAnswer;
+  if (!exists) {
     quizzes[hardRecallFolder].push(questionCopy);
-  } else {
-    // Update existing question's incorrect count
-    quizzes[hardRecallFolder][existingIndex].timesIncorrect = 
-      (quizzes[hardRecallFolder][existingIndex].timesIncorrect || 0) + 1;
+    saveQuizzes();
   }
-  
-  saveQuizzes();
 }
-
 function removeFromHardRecall(question) {
   const hardRecallFolder = `${currentFolder}_HardRecall`;
   
   if (quizzes[hardRecallFolder]) {
+    // Find and remove the question
     quizzes[hardRecallFolder] = quizzes[hardRecallFolder].filter(q => 
       !(q.question === question.question && 
         q.options.join('|') === question.options.join('|'))
     );
+    
     saveQuizzes();
   }
 }
@@ -1618,8 +1619,7 @@ function showHardRecallQuestions() {
     return;
   }
 
-  // Create a fresh copy of questions to prevent modifying originals
-  currentQuiz = JSON.parse(JSON.stringify(quizzes[hardRecallFolder]));
+  currentQuiz = quizzes[hardRecallFolder];
   currentQuestionIndex = 0;
   score = 0;
   incorrectQuestions = [];
