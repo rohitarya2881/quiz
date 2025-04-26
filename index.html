@@ -72,6 +72,8 @@
         <button class="button-quiz" onclick="clearAndRefresh()">Reset All Data</button>
         <button class="button-quiz" onclick="showAnalysis()">Quiz Analysis</button>
         <button class="button-quiz" onclick="showFlashcards()">Flashcards</button>
+        <!-- Inside your mobile-menu div, add this button: -->
+<button class="button-quiz delete-btn" onclick="confirmDeleteFolder()">Delete Folder</button>
         <input type="file" id="jsonFileInputUpload" style="display: none;" accept=".json"
             onchange="handleFileUpload(event)">
         <input type="file" id="jsonFileInputRestore" style="display: none;" accept=".json"
