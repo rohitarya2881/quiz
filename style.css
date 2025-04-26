@@ -1735,3 +1735,58 @@ footer {
   font-size: 18px;
   display: block;
 }
+
+
+/* Style for delete button */
+.delete-btn {
+  background-color: #e74c3c;
+  color: white;
+  margin-top: 15px;
+}
+
+.delete-btn:hover {
+  background-color: #c0392b;
+}
+
+/* Confirmation dialog styles */
+.confirm-dialog {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  background: white;
+  padding: 20px;
+  border-radius: 8px;
+  box-shadow: 0 0 20px rgba(0,0,0,0.2);
+  z-index: 1000;
+  max-width: 90%;
+  width: 400px;
+}
+
+.confirm-dialog h3 {
+  margin-top: 0;
+  color: #e74c3c;
+}
+
+.confirm-dialog-buttons {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  margin-top: 20px;
+}
+
+.confirm-dialog-buttons button {
+  padding: 8px 16px;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.confirm-dialog-buttons .confirm-btn {
+  background-color: #e74c3c;
+  color: white;
+}
+
+.confirm-dialog-buttons .cancel-btn {
+  background-color: #ecf0f1;
+}
