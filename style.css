@@ -1644,3 +1644,94 @@ footer {
   line-height: 1.5; /* Improves readability */
   white-space: pre-line; /* Preserves line breaks naturally */
 }
+
+
+/* Recall Mode Styles */
+.recall-container {
+  margin-top: 20px;
+  border: 1px solid #ddd;
+  padding: 15px;
+  border-radius: 8px;
+  background-color: #f9f9f9;
+}
+
+.recall-prompt {
+  margin-bottom: 15px;
+}
+
+.recall-btn {
+  padding: 8px 12px;
+  margin: 5px;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 16px;
+  transition: all 0.2s;
+}
+
+.recall-success {
+  background-color: #e6f7e6;
+  color: #2e7d32;
+}
+
+.recall-partial {
+  background-color: #fff8e6;
+  color: #f57f17;
+}
+
+.recall-fail {
+  background-color: #ffebee;
+  color: #c62828;
+}
+
+.recall-btn:hover {
+  transform: scale(1.05);
+}
+
+#show-options-btn {
+  margin-top: 10px;
+  background-color: #4a6fa5;
+  color: white;
+}
+
+/* Recall Stats */
+.recall-stats {
+  display: flex;
+  justify-content: space-around;
+  margin: 20px 0;
+}
+
+.recall-stat {
+  text-align: center;
+  padding: 10px;
+  border-radius: 8px;
+  width: 30%;
+}
+
+.recall-success {
+  background-color: #e6f7e6;
+}
+
+.recall-partial {
+  background-color: #fff8e6;
+}
+
+.recall-fail {
+  background-color: #ffebee;
+}
+
+.recall-icon {
+  font-size: 24px;
+  display: block;
+}
+
+.recall-count {
+  font-size: 24px;
+  font-weight: bold;
+  display: block;
+}
+
+.recall-percent {
+  font-size: 18px;
+  display: block;
+}
