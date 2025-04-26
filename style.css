@@ -1708,6 +1708,17 @@ footer {
   width: 30%;
 }
 
+@media (max-width: 600px) {
+ .recall-stat {
+    text-align: center;
+    padding: 10px;
+    border-radius: 8px;
+    width: 23%;
+    font-size: .6rem;
+}
+}
+
+
 .recall-success {
   background-color: #e6f7e6;
 }
