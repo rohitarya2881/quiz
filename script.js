@@ -387,7 +387,7 @@ async function showResults() {
   // Add timing for each question
   currentQuiz.forEach((question, index) => {
     const timeTaken = questionTimes[index] || 0;
-    const isSlow = timeTaken > avgTimeThreshold * 1.5; // 50% slower than average
+    const isSlow = timeTaken > avgTimeThreshold * 1.5;
     timingHTML += `
           <li class="${isSlow ? "slow-time" : "fast-time"}">
               Q${index + 1}: ${timeTaken.toFixed(1)}s
@@ -398,11 +398,69 @@ async function showResults() {
 
   timingHTML += `</ul></div>`;
 
+  // Calculate recall statistics if in recall mode
+  let recallHTML = "";
+  if (recallMode) {
+    const recallStats = {
+      "🟢": 0,
+      "🟡": 0,
+      "🔴": 0
+    };
+    
+    Object.values(recallAttempts).forEach(result => {
+      recallStats[result]++;
+    });
+    
+    const totalRecallAttempts = Object.values(recallStats).reduce((a, b) => a + b, 0);
+    
+    recallHTML = `
+      <h3>Recall Performance</h3>
+      <div class="recall-stats">
+        <div class="recall-stat recall-success">
+          <span class="recall-icon">🟢</span>
+          <span class="recall-count">${recallStats["🟢"]}</span>
+          <span class="recall-label">Remembered</span>
+          <span class="recall-percent">${totalRecallAttempts > 0 ? Math.round((recallStats["🟢"] / totalRecallAttempts) * 100 : 0}%</span>
+        </div>
+        <div class="recall-stat recall-partial">
+          <span class="recall-icon">🟡</span>
+          <span class="recall-count">${recallStats["🟡"]}</span>
+          <span class="recall-label">Needed Options</span>
+          <span class="recall-percent">${totalRecallAttempts > 0 ? Math.round((recallStats["🟡"] / totalRecallAttempts) * 100 : 0}%</span>
+        </div>
+        <div class="recall-stat recall-fail">
+          <span class="recall-icon">🔴</span>
+          <span class="recall-count">${recallStats["🔴"]}</span>
+          <span class="recall-label">Forgot</span>
+          <span class="recall-percent">${totalRecallAttempts > 0 ? Math.round((recallStats["🔴"] / totalRecallAttempts) * 100 : 0}%</span>
+        </div>
+      </div>
+    `;
+    
+    // Store questions that were hard to recall (🔴)
+    const hardRecallQuestions = currentQuiz.filter((_, index) => recallAttempts[index] === "🔴");
+    if (hardRecallQuestions.length > 0) {
+      const hardRecallFolder = `${currentFolder}_HardRecall`;
+      if (!quizzes[hardRecallFolder]) {
+        quizzes[hardRecallFolder] = [];
+      }
+      
+      hardRecallQuestions.forEach(question => {
+        if (!quizzes[hardRecallFolder].some(q => q.question === question.question)) {
+          quizzes[hardRecallFolder].push(question);
+        }
+      });
+      
+      await saveQuizzes();
+    }
+  }
+
   // Create results HTML
   let resultsHTML = `
       <h2>Quiz Completed!</h2>
       <p>Your Score: ${score} / ${currentQuiz.length}</p>
       ${timingHTML}
+      ${recallHTML}
       <h3>Incorrect Questions:</h3>
       <div id="incorrect-answers"></div>
       <button class="quiz-btn" onclick="restartQuiz()">Restart Quiz</button>
@@ -426,8 +484,8 @@ async function showResults() {
               }</p>
               <p><span style="color: green;">✔ Correct Answer:</span> ${
                 item.options[item.correctIndex]
-              }  <p><strong>Explanation:</strong> ${formatExplanation(item.explanation)}</p>
-
+              }</p>
+              <p><strong>Explanation:</strong> ${formatExplanation(item.explanation)}</p>
               <hr>
           `;
       incorrectContainer.appendChild(div);
@@ -445,12 +503,10 @@ async function showResults() {
   });
   const accuracy = (score / currentQuiz.length) * 100;
   
-  // Add celebration for high accuracy
   if (accuracy >= 90) {
     triggerHighAccuracyCelebration();
   }
 }
-
 function triggerFlashcardMilestoneCelebration(milestone) {
   try {
     if (!milestone) return;
@@ -1275,11 +1331,7 @@ function timeUp() {
 // Modify your startQuiz function to include timer setup
 // In startQuiz function - move questionStartTime before timer prompt
 async function startQuiz(mode) {
-  if (
-    !currentFolder ||
-    !quizzes[currentFolder] ||
-    quizzes[currentFolder].length === 0
-  ) {
+  if (!currentFolder || !quizzes[currentFolder] || quizzes[currentFolder].length === 0) {
     alert("Please select a valid folder with questions!");
     return;
   }
@@ -1287,7 +1339,15 @@ async function startQuiz(mode) {
   // Reset time tracking
   questionTimes = [];
   totalQuizTime = 0;
-  questionStartTime = Date.now(); // Moved this up
+  questionStartTime = Date.now();
+
+  // Ask for recall mode preference
+  recallMode = confirm("Do you want to test your recall before seeing options?\n\n🟢 = Remembered before options\n🟡 = Needed options to recall\n🔴 = Couldn't recall even with options");
+  
+  if (recallMode) {
+    recallAttempts = {};
+    alert("Options will be hidden for 10 seconds. Try to recall the answer before they appear!");
+  }
 
   // Ask for timer preference
   const useTimer = confirm("Would you like to enable a timer for this quiz?");
@@ -1306,9 +1366,7 @@ async function startQuiz(mode) {
   let totalQuestions = quizzes[currentFolder].length;
   let startIndex = parseInt(document.getElementById("startIndex").value) - 1;
   let endIndex = parseInt(document.getElementById("endIndex").value);
-  questionTimes = [];
-  totalQuizTime = 0;
-  questionStartTime = Date.now();
+
   // Validate range
   if (isNaN(startIndex)) startIndex = 0;
   if (isNaN(endIndex)) endIndex = totalQuestions;
@@ -1318,6 +1376,7 @@ async function startQuiz(mode) {
     startIndex = 0;
     endIndex = totalQuestions;
   }
+
   // Reset quiz state
   currentQuestionIndex = 0;
   score = 0;
@@ -1327,7 +1386,6 @@ async function startQuiz(mode) {
   document.getElementById("current-question").textContent = "1";
   document.getElementById("total-questions").textContent = currentQuiz.length;
 
-  // Rest of your existing startQuiz code...
   quizMode = mode;
 
   if (mode === "difficult") {
@@ -1345,7 +1403,6 @@ async function startQuiz(mode) {
 
   loadQuestion();
 }
-
 // Update loadQuestion to show progress
 function loadQuestion() {
   if (currentQuestionIndex >= currentQuiz.length) {
@@ -1355,22 +1412,102 @@ function loadQuestion() {
   }
 
   // Update progress display
-  document.getElementById("current-question").textContent =
-    currentQuestionIndex + 1;
+  document.getElementById("current-question").textContent = currentQuestionIndex + 1;
   document.getElementById("total-questions").textContent = currentQuiz.length;
+
   const questionData = currentQuiz[currentQuestionIndex];
   document.getElementById("question-text").textContent = questionData.question;
+  
   const optionsContainer = document.getElementById("options");
   optionsContainer.innerHTML = "";
-  questionData.options.forEach((option, index) => {
-    const button = document.createElement("button");
-    button.classList.add("option-btn");
-    button.textContent = option;
-    button.onclick = () => selectAnswer(index);
-    optionsContainer.appendChild(button);
-  });
+
+  // Add recall UI if in recall mode
+  if (recallMode) {
+    const recallContainer = document.createElement("div");
+    recallContainer.className = "recall-container";
+    
+    recallContainer.innerHTML = `
+      <div class="recall-prompt">
+        <p>Try to recall the answer before seeing options:</p>
+        <button class="recall-btn recall-success" onclick="handleRecallAttempt('🟢')">🟢 Remembered</button>
+        <button class="recall-btn recall-partial" onclick="handleRecallAttempt('🟡')">🟡 Needed Options</button>
+        <button class="recall-btn recall-fail" onclick="handleRecallAttempt('🔴')">🔴 Forgot</button>
+      </div>
+      <div id="options-container" class="hidden"></div>
+      <button id="show-options-btn" class="quiz-btn" onclick="showOptionsNow()">Show Options Now</button>
+    `;
+    
+    optionsContainer.appendChild(recallContainer);
+    
+    // Hide options initially, show after timeout
+    setTimeout(() => {
+      if (recallAttempts[currentQuestionIndex] === undefined) {
+        recallAttempts[currentQuestionIndex] = "🟡";
+      }
+      document.getElementById("options-container").classList.remove("hidden");
+      document.getElementById("show-options-btn").classList.add("hidden");
+    }, 10000);
+    
+    // Create actual options in hidden container
+    const optionsInnerContainer = document.getElementById("options-container");
+    questionData.options.forEach((option, index) => {
+      const button = document.createElement("button");
+      button.classList.add("option-btn");
+      button.textContent = option;
+      button.onclick = () => selectAnswer(index);
+      optionsInnerContainer.appendChild(button);
+    });
+  } 
+  else {
+    // Normal mode - show options immediately
+    questionData.options.forEach((option, index) => {
+      const button = document.createElement("button");
+      button.classList.add("option-btn");
+      button.textContent = option;
+      button.onclick = () => selectAnswer(index);
+      optionsContainer.appendChild(button);
+    });
+  }
+}
+function handleRecallAttempt(result) {
+  recallAttempts[currentQuestionIndex] = result;
+  showOptionsNow();
 }
 
+function showOptionsNow() {
+  const optionsContainer = document.getElementById("options-container");
+  const showBtn = document.getElementById("show-options-btn");
+  
+  if (optionsContainer) optionsContainer.classList.remove("hidden");
+  if (showBtn) showBtn.classList.add("hidden");
+  
+  if (recallAttempts[currentQuestionIndex] === undefined) {
+    recallAttempts[currentQuestionIndex] = "🟡";
+  }
+}
+
+function showHardRecallQuestions() {
+  if (!currentFolder) {
+    alert("Please select a folder first!");
+    return;
+  }
+
+  const hardRecallFolder = `${currentFolder}_HardRecall`;
+  if (!quizzes[hardRecallFolder] || quizzes[hardRecallFolder].length === 0) {
+    alert("No hard recall questions found!");
+    return;
+  }
+
+  currentQuiz = quizzes[hardRecallFolder];
+  currentQuestionIndex = 0;
+  score = 0;
+  incorrectQuestions = [];
+  
+  document.getElementById("quizContainer").classList.remove("hidden");
+  document.getElementById("quizOptions").classList.add("hidden");
+  
+  loadQuestion();
+}
 function goHome() {
   // Clear timer and reset states
   if (quizTimer) {
