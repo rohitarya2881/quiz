@@ -420,19 +420,19 @@ async function showResults() {
           <span class="recall-icon">🟢</span>
           <span class="recall-count">${recallStats["🟢"]}</span>
           <span class="recall-label">Remembered</span>
-          <span class="recall-percent">${totalRecallAttempts > 0 ? Math.round((recallStats["🟢"] / totalRecallAttempts) * 100 : 0}%</span>
+          <span class="recall-percent">${totalRecallAttempts > 0 ? Math.round((recallStats["🟢"] / totalRecallAttempts) * 100) : 0}%</span>
         </div>
         <div class="recall-stat recall-partial">
           <span class="recall-icon">🟡</span>
           <span class="recall-count">${recallStats["🟡"]}</span>
           <span class="recall-label">Needed Options</span>
-          <span class="recall-percent">${totalRecallAttempts > 0 ? Math.round((recallStats["🟡"] / totalRecallAttempts) * 100 : 0}%</span>
+          <span class="recall-percent">${totalRecallAttempts > 0 ? Math.round((recallStats["🟡"] / totalRecallAttempts) * 100) : 0}%</span>
         </div>
         <div class="recall-stat recall-fail">
           <span class="recall-icon">🔴</span>
           <span class="recall-count">${recallStats["🔴"]}</span>
           <span class="recall-label">Forgot</span>
-          <span class="recall-percent">${totalRecallAttempts > 0 ? Math.round((recallStats["🔴"] / totalRecallAttempts) * 100 : 0}%</span>
+          <span class="recall-percent">${totalRecallAttempts > 0 ? Math.round((recallStats["🔴"] / totalRecallAttempts) * 100) : 0}%</span>
         </div>
       </div>
     `;
