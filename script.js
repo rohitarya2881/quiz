@@ -1501,7 +1501,7 @@ function loadQuestion() {
         <button class="recall-btn recall-partial" onclick="handleRecallAttempt('🟡')">🟡 Needed Options</button>
         <button class="recall-btn recall-fail" onclick="handleRecallAttempt('🔴')">🔴 Forgot</button>
       </div>
-      <div id="options-container" class="hidden"></div>
+      <div id="options-container" class="hidden options"></div>
       <button id="show-options-btn" class="quiz-btn" onclick="showOptionsNow()">Show Options Now</button>
     `;
     
