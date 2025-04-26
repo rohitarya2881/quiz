@@ -203,7 +203,7 @@ header {
 }
 
 /* Options Buttons */
-#options {
+#options,.options {
     display: flex;
     flex-direction: column;
     gap: 10px;
