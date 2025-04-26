@@ -1342,12 +1342,12 @@ async function startQuiz(mode) {
   questionStartTime = Date.now();
 
   // Ask for recall mode preference
-  recallMode = confirm("Do you want to test your recall before seeing options?\n\n🟢 = Remembered before options\n🟡 = Needed options to recall\n🔴 = Couldn't recall even with options");
-  
-  if (recallMode) {
+recallMode = confirm("Do you want to test your recall before seeing options?\n\n🟢 = Remembered before options\n🟡 = Needed options to recall\n🔴 = Couldn't recall even with options");  
+   if (recallMode) {
     recallAttempts = {};
-    alert("Options will be hidden for 10 seconds. Try to recall the answer before they appear!");
+    alert("Options will be hidden until you select a recall result or click 'Show Options Now'");
   }
+
 
   // Ask for timer preference
   const useTimer = confirm("Would you like to enable a timer for this quiz?");
@@ -1439,15 +1439,6 @@ function loadQuestion() {
     
     optionsContainer.appendChild(recallContainer);
     
-    // Hide options initially, show after timeout
-    setTimeout(() => {
-      if (recallAttempts[currentQuestionIndex] === undefined) {
-        recallAttempts[currentQuestionIndex] = "🟡";
-      }
-      document.getElementById("options-container").classList.remove("hidden");
-      document.getElementById("show-options-btn").classList.add("hidden");
-    }, 10000);
-    
     // Create actual options in hidden container
     const optionsInnerContainer = document.getElementById("options-container");
     questionData.options.forEach((option, index) => {
@@ -1481,6 +1472,7 @@ function showOptionsNow() {
   if (optionsContainer) optionsContainer.classList.remove("hidden");
   if (showBtn) showBtn.classList.add("hidden");
   
+  // If user hasn't made a recall attempt yet, default to "needed options"
   if (recallAttempts[currentQuestionIndex] === undefined) {
     recallAttempts[currentQuestionIndex] = "🟡";
   }
