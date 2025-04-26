@@ -351,14 +351,36 @@ async function selectAnswer(selectedIndex) {
   const question = currentQuiz[currentQuestionIndex];
   const isCorrect = selectedIndex === question.correctIndex;
   
+  // Track recall accuracy
+  if (recallMode) {
+    const recallStatus = recallAttempts[currentQuestionIndex] || "🟡"; // Default to needed options
+    
+    // Update question with recall data
+    question.recallData = question.recallData || {};
+    question.recallData.lastAttempt = {
+      status: recallStatus,
+      correct: isCorrect,
+      timestamp: new Date().toISOString()
+    };
+  }
+  
   if (isCorrect) {
     score++;
-    // Track correct question by some identifier (could use question text or index)
     question.correctlyAnswered = true;
+    
+    // If recalled correctly without options (🟢), remove from HardRecall if present
+    if (recallMode && recallAttempts[currentQuestionIndex] === "🟢") {
+      removeFromHardRecall(question);
+    }
   } else {
     question.timesIncorrect = (question.timesIncorrect || 0) + 1;
     question.selectedAnswer = question.options[selectedIndex];
     incorrectQuestions.push(question);
+    
+    // If answered incorrectly (even if recalled), add to HardRecall
+    if (recallMode) {
+      addToHardRecall(question);
+    }
   }
   
   currentQuestionIndex++;
@@ -369,7 +391,38 @@ async function selectAnswer(selectedIndex) {
   }
   questionStartTime = Date.now();
 }
+function addToHardRecall(question) {
+  const hardRecallFolder = `${currentFolder}_HardRecall`;
+  
+  if (!quizzes[hardRecallFolder]) {
+    quizzes[hardRecallFolder] = [];
+  }
+  
+  // Check if question already exists in HardRecall
+  const exists = quizzes[hardRecallFolder].some(q => 
+    q.question === question.question && 
+    q.options.join('|') === question.options.join('|')
+  );
+  
+  if (!exists) {
+    quizzes[hardRecallFolder].push(JSON.parse(JSON.stringify(question)));
+    saveQuizzes();
+  }
+}
 
+function removeFromHardRecall(question) {
+  const hardRecallFolder = `${currentFolder}_HardRecall`;
+  
+  if (quizzes[hardRecallFolder]) {
+    // Find and remove the question
+    quizzes[hardRecallFolder] = quizzes[hardRecallFolder].filter(q => 
+      !(q.question === question.question && 
+        q.options.join('|') === question.options.join('|'))
+    );
+    
+    saveQuizzes();
+  }
+}
 // Fixed showResults function
 async function showResults() {
   // Calculate average time threshold
@@ -438,21 +491,21 @@ async function showResults() {
     `;
     
     // Store questions that were hard to recall (🔴)
-    const hardRecallQuestions = currentQuiz.filter((_, index) => recallAttempts[index] === "🔴");
-    if (hardRecallQuestions.length > 0) {
-      const hardRecallFolder = `${currentFolder}_HardRecall`;
-      if (!quizzes[hardRecallFolder]) {
-        quizzes[hardRecallFolder] = [];
-      }
+    // const hardRecallQuestions = currentQuiz.filter((_, index) => recallAttempts[index] === "🔴");
+    // if (hardRecallQuestions.length > 0) {
+    //   const hardRecallFolder = `${currentFolder}_HardRecall`;
+    //   if (!quizzes[hardRecallFolder]) {
+    //     quizzes[hardRecallFolder] = [];
+    //   }
       
-      hardRecallQuestions.forEach(question => {
-        if (!quizzes[hardRecallFolder].some(q => q.question === question.question)) {
-          quizzes[hardRecallFolder].push(question);
-        }
-      });
+    //   hardRecallQuestions.forEach(question => {
+    //     if (!quizzes[hardRecallFolder].some(q => q.question === question.question)) {
+    //       quizzes[hardRecallFolder].push(question);
+    //     }
+    //   });
       
-      await saveQuizzes();
-    }
+    //   await saveQuizzes();
+    // }
   }
 
   // Create results HTML
@@ -1342,11 +1395,16 @@ async function startQuiz(mode) {
   questionStartTime = Date.now();
 
   // Ask for recall mode preference
-recallMode = confirm("Do you want to test your recall before seeing options?\n\n🟢 = Remembered before options\n🟡 = Needed options to recall\n🔴 = Couldn't recall even with options");  
-   if (recallMode) {
+  recallMode = confirm("Do you want to test your recall before seeing options?\n\n" +
+                      "🟢 = Remembered before options (will remove from HardRecall if correct)\n" +
+                      "🟡 = Needed options to recall\n" +
+                      "🔴 = Forgot\n\n" +
+                      "Any wrong answer will add to HardRecall");
+  
+  if (recallMode) {
     recallAttempts = {};
-    alert("Options will be hidden until you select a recall result or click 'Show Options Now'");
   }
+
 
 
   // Ask for timer preference
