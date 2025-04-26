@@ -3409,3 +3409,78 @@ function formatExplanation(explanation) {
   
   return `<span class="explanation-text">${formattedText}</span>`;
 }
+// Add this function to delete a folder
+async function confirmDeleteFolder() {
+  if (!currentFolder) {
+    alert("Please select a folder first!");
+    return;
+  }
+
+  const confirmation = confirm(`Are you sure you want to permanently delete the folder "${currentFolder}" and all its associated data? This cannot be undone!`);
+  
+  if (confirmation) {
+    try {
+      // Delete the main folder and its associated folders (_Incorrect, _HardRecall)
+      const foldersToDelete = [currentFolder, `${currentFolder}_Incorrect`, `${currentFolder}_HardRecall`];
+      
+      foldersToDelete.forEach(folder => {
+        if (quizzes[folder]) {
+          delete quizzes[folder];
+        }
+      });
+
+      // Save the updated quizzes object
+      await saveQuizzes();
+      
+      // Clear current folder selection
+      currentFolder = "";
+      
+      // Update the UI
+      updateFolderList();
+      goHome();
+      
+      // Show success message
+      alert(`Folder "${currentFolder}" and its associated data have been deleted successfully.`);
+      
+    } catch (error) {
+      console.error("Error deleting folder:", error);
+      alert("Failed to delete folder. Please try again.");
+    }
+  }
+}
+
+// Add this function to handle folder deletion with all its data
+async function deleteFolder(folderName) {
+  if (!folderName || !quizzes[folderName]) {
+    console.error("Invalid folder name or folder doesn't exist");
+    return false;
+  }
+
+  try {
+    // Delete the main folder and its associated folders
+    const foldersToDelete = [folderName, `${folderName}_Incorrect`, `${folderName}_HardRecall`];
+    
+    foldersToDelete.forEach(folder => {
+      if (quizzes[folder]) {
+        delete quizzes[folder];
+      }
+    });
+
+    // Save to IndexedDB
+    await saveQuizzes();
+    
+    // If the deleted folder was the current folder, reset it
+    if (currentFolder === folderName) {
+      currentFolder = "";
+      goHome();
+    }
+    
+    // Update folder list
+    updateFolderList();
+    
+    return true;
+  } catch (error) {
+    console.error("Error deleting folder:", error);
+    return false;
+  }
+}
