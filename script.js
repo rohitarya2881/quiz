@@ -353,7 +353,13 @@ async function selectAnswer(selectedIndex) {
   
   // Track recall accuracy
   if (recallMode) {
-    const recallStatus = recallAttempts[currentQuestionIndex] || "🟡"; // Default to needed options
+    let recallStatus = recallAttempts[currentQuestionIndex] || "🟡"; // Default to needed options
+    
+    // If marked "Remembered" but answered wrong, change to "Forgot"
+    if (recallStatus === "🟢" && !isCorrect) {
+      recallStatus = "🔴";
+      recallAttempts[currentQuestionIndex] = "🔴"; // Update the recall attempt
+    }
     
     // Update question with recall data
     question.recallData = question.recallData || {};
@@ -377,10 +383,8 @@ async function selectAnswer(selectedIndex) {
     question.selectedAnswer = question.options[selectedIndex];
     incorrectQuestions.push(question);
     
-    // If answered incorrectly (even if recalled), add to HardRecall
-    if (recallMode) {
-      addToHardRecall(question);
-    }
+    // Always add to HardRecall if answered incorrectly
+    addToHardRecall(question);
   }
   
   currentQuestionIndex++;
@@ -398,18 +402,24 @@ function addToHardRecall(question) {
     quizzes[hardRecallFolder] = [];
   }
   
+  // Create a clean copy of the question without temporary properties
+  const questionCopy = JSON.parse(JSON.stringify(question));
+  delete questionCopy.recallData;
+  delete questionCopy.correctlyAnswered;
+  delete questionCopy.selectedAnswer;
+  
   // Check if question already exists in HardRecall
   const exists = quizzes[hardRecallFolder].some(q => 
-    q.question === question.question && 
-    q.options.join('|') === question.options.join('|')
+    q.question === questionCopy.question && 
+    q.options.join('|') === questionCopy.options.join('|') &&
+    q.correctIndex === questionCopy.correctIndex
   );
   
   if (!exists) {
-    quizzes[hardRecallFolder].push(JSON.parse(JSON.stringify(question)));
+    quizzes[hardRecallFolder].push(questionCopy);
     saveQuizzes();
   }
 }
-
 function removeFromHardRecall(question) {
   const hardRecallFolder = `${currentFolder}_HardRecall`;
   
