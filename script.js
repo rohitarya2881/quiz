@@ -74,50 +74,7 @@ async function saveQuizResult(resultData) {
     request.onerror = (event) => reject(event.target.error);
   });
 }
-// Function to confirm folder deletion
-function confirmDeleteFolder() {
-  if (!currentFolder) {
-    alert("Please select a folder first!");
-    return;
-  }
 
-  if (confirm(`Are you sure you want to permanently delete the folder "${currentFolder}"?\n\nThis will also delete its _Incorrect and _HardRecall versions.`)) {
-    deleteFolder(currentFolder);
-  }
-}
-
-// Main delete folder function
-async function deleteFolder(folderName) {
-  try {
-    // Delete main folder and its variants
-    const foldersToDelete = [folderName, `${folderName}_Incorrect`, `${folderName}_HardRecall`];
-    
-    foldersToDelete.forEach(folder => {
-      if (quizzes[folder]) {
-        delete quizzes[folder];
-      }
-    });
-
-    // Save changes to IndexedDB
-    await saveQuizzes();
-    
-    // Reset current folder if it was deleted
-    if (currentFolder === folderName) {
-      currentFolder = "";
-      document.getElementById("folderSelect").value = "";
-      document.getElementById("quizOptions").classList.add("hidden");
-    }
-    
-    // Update UI
-    updateFolderList();
-    goHome();
-    
-    alert(`Folder "${folderName}" and its related folders have been deleted.`);
-  } catch (error) {
-    console.error("Error deleting folder:", error);
-    alert("Failed to delete folder. Please try again.");
-  }
-}
 async function getQuizResults(folderName) {
   return new Promise((resolve, reject) => {
     const transaction = db.transaction(["analytics"], "readonly");
@@ -218,39 +175,21 @@ async function createFolder() {
 // Update the folder dropdown list
 function updateFolderList() {
   const folderSelect = document.getElementById("folderSelect");
-  folderSelect.innerHTML = '<option value="" disabled selected>Select a folder</option>';
-  
+  folderSelect.innerHTML =
+    '<option value="" disabled selected>Select a folder</option>';
   Object.keys(quizzes).forEach((folder) => {
-    // Only show main folders (not _Incorrect or _HardRecall versions)
-    if (!folder.includes("_Incorrect") && !folder.includes("_HardRecall")) {
+    if (!folder.includes("_Incorrect")) {
       const option = document.createElement("option");
       option.value = folder;
       option.textContent = folder;
       folderSelect.appendChild(option);
     }
   });
-  
   if (currentFolder) {
-    folderSelect.value = currentFolder;
+    folderSelect.value = currentFolder; // Retain selected folder
   }
 }
 
-function confirmDeleteFolder() {
-  if (!currentFolder) {
-    alert("Please select a folder first!");
-    return;
-  }
-
-  // Prevent deletion of system folders
-  if (currentFolder.includes("_Incorrect") || currentFolder.includes("_HardRecall")) {
-    alert("You can't directly delete system folders. Delete the main folder instead.");
-    return;
-  }
-
-  if (confirm(`Are you sure you want to permanently delete the folder "${currentFolder}"?\n\nThis will also delete its _Incorrect and _HardRecall versions.`)) {
-    deleteFolder(currentFolder);
-  }
-}
 // Handle folder selection
 function selectFolder() {
   currentFolder = document.getElementById("folderSelect").value;
