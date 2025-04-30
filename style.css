@@ -94,6 +94,7 @@ header {
     font-size: 24px;
     cursor: pointer;
     color: #333;
+  z-index: 10000;
 }
 
 .dark-theme #close-menu-btn {
