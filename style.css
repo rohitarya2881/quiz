@@ -1801,3 +1801,122 @@ footer {
 .confirm-dialog-buttons .cancel-btn {
   background-color: #ecf0f1;
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+/* Rapid Round Modal */
+.rapid-round-modal {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.8);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+}
+
+.rapid-round-dialog {
+  background-color: #06080D;
+  padding: 20px;
+  border-radius: 8px;
+  width: 90%;
+  max-width: 500px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+.rapid-round-dialog h3 {
+  margin-top: 0;
+  color: #4a6fa5;
+}
+
+.form-group {
+  margin-bottom: 15px;
+}
+
+.form-group label {
+  display: block;
+  margin-bottom: 5px;
+  font-weight: 500;
+}
+
+.form-group input, 
+.form-group select {
+  width: 100%;
+  padding: 8px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+}
+
+.range-inputs {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.range-inputs input {
+  flex: 1;
+}
+
+.button-group {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  margin-top: 20px;
+}
+
+.cancel-btn {
+  background-color: #e74c3c;
+}
+
+/* Rapid Timer */
+.rapid-timer {
+  position: fixed;
+  top: 20px;
+  right: 20px;
+  background-color: #4a6fa5;
+  color: white;
+  padding: 10px 15px;
+  border-radius: 5px;
+  z-index: 1000;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+}
+
+.rapid-timer.warning {
+  background-color: #e74c3c;
+  animation: pulse 1s infinite;
+}
+
+.rapid-timer-content {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+@keyframes pulse {
+  0% { transform: scale(1); }
+  50% { transform: scale(1.05); }
+  100% { transform: scale(1); }
+}
+
+/* Rapid Round Button */
+.rapid-round-btn {
+  background-color: #f39c12;
+  margin-top: 15px;
+}
+
+.rapid-round-btn:hover {
+  background-color: #e67e22;
+}
