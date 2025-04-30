@@ -391,7 +391,22 @@ async function selectAnswer(selectedIndex) {
   if (currentQuestionIndex < currentQuiz.length) {
     loadQuestion();
   } else {
-    await showResults();
+    // Check if we're in rapid round mode
+    if (rapidRoundActive) {
+      // Clear the quiz timer if it exists
+      if (currentRapidTimer) {
+        clearInterval(currentRapidTimer);
+        currentRapidTimer = null;
+      }
+      // Remove the timer display if it exists
+      const timerDisplay = document.getElementById('rapidTimerDisplay');
+      if (timerDisplay) timerDisplay.remove();
+      
+      // Show results immediately
+      await showRapidRoundResults();
+    } else {
+      await showResults();
+    }
   }
   questionStartTime = Date.now();
 }
@@ -528,7 +543,8 @@ async function showResults() {
       <div id="incorrect-answers"></div>
       <button class="quiz-btn" onclick="restartQuiz()">Restart Quiz</button>
       <button class="quiz-btn" onclick="goHome()">Home</button>
-  `;
+      `;
+    
 
   document.getElementById("quizContainer").innerHTML = resultsHTML;
 
@@ -1569,6 +1585,9 @@ function showHardRecallQuestions() {
   loadQuestion();
 }
 function goHome() {
+  if (rapidRoundActive) {
+    cleanupRapidRound();
+  }
   // Clear timer and reset states
   if (quizTimer) {
     clearInterval(quizTimer);
@@ -1651,6 +1670,8 @@ function goHome() {
   stopFlashcardTimer();
   document.removeEventListener('visibilitychange', handleVisibilityChange);
   stopFlashcardStudy();
+  
+  
 
 }
 
