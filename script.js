@@ -1421,15 +1421,15 @@ async function startQuiz(mode) {
   questionStartTime = Date.now();
 
   // Ask for recall mode preference
-  // recallMode = confirm("Do you want to test your recall before seeing options?\n\n" +
-  //                     "🟢 = Remembered before options (will remove from HardRecall if correct)\n" +
-  //                     "🟡 = Needed options to recall\n" +
-  //                     "🔴 = Forgot\n\n" +
-  //                     "Any wrong answer will add to HardRecall");
+  recallMode = confirm("Do you want to test your recall before seeing options?\n\n" +
+                      "🟢 = Remembered before options (will remove from HardRecall if correct)\n" +
+                      "🟡 = Needed options to recall\n" +
+                      "🔴 = Forgot\n\n" +
+                      "Any wrong answer will add to HardRecall");
   
-  // if (recallMode) {
-  //   recallAttempts = {};
-  // }
+  if (recallMode) {
+    recallAttempts = {};
+  }
 
 
 
@@ -3505,4 +3505,5 @@ async function deleteFolder(folderName) {
     return false;
   }
 }
+
 
