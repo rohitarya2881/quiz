@@ -17,23 +17,25 @@ let flashcardStartTime = 0;
 // Update the initDB function in script.js
 function initDB() {
   return new Promise((resolve, reject) => {
-    const request = indexedDB.open("QuizManagerDB", 3);
+    const request = indexedDB.open("QuizManagerDB", 2); // Version 2
 
     request.onupgradeneeded = (event) => {
       const db = event.target.result;
-      if (!db.objectStoreNames.contains("goalTracking")) {
-        const goalStore = db.createObjectStore("goalTracking", { keyPath: "id" });
-        goalStore.createIndex("type", "type", { unique: false });
-      }
+
+      // Create quizzes store if it doesn't exist
       if (!db.objectStoreNames.contains("quizzes")) {
         db.createObjectStore("quizzes", { keyPath: "folderName" });
       }
+
+      // Create analytics store
       if (!db.objectStoreNames.contains("analytics")) {
         const analyticsStore = db.createObjectStore("analytics", {
           keyPath: "id",
           autoIncrement: true,
         });
-        analyticsStore.createIndex("folderName", "folderName", { unique: false });
+        analyticsStore.createIndex("folderName", "folderName", {
+          unique: false,
+        });
         analyticsStore.createIndex("date", "date", { unique: false });
       }
     };
@@ -353,7 +355,6 @@ async function selectAnswer(selectedIndex) {
   
   if (isCorrect) {
     score++;
-    // Track correct question by some identifier (could use question text or index)
     question.correctlyAnswered = true;
   } else {
     question.timesIncorrect = (question.timesIncorrect || 0) + 1;
@@ -362,14 +363,29 @@ async function selectAnswer(selectedIndex) {
   }
   
   currentQuestionIndex++;
+  
   if (currentQuestionIndex < currentQuiz.length) {
     loadQuestion();
   } else {
-    await showResults();
+    // Quiz completed - show results immediately
+    if (rapidRoundActive) {
+      // Clear the timer if it exists
+      if (currentRapidTimer) {
+        clearInterval(currentRapidTimer);
+        currentRapidTimer = null;
+      }
+      // Remove timer display if it exists
+      const timerDisplay = document.getElementById('rapidTimerDisplay');
+      if (timerDisplay) timerDisplay.remove();
+      // Show rapid round results with buttons
+      await showRapidRoundResults();
+    } else {
+      await showResults();
+    }
   }
+  
   questionStartTime = Date.now();
 }
-
 // Fixed showResults function
 async function showResults() {
   // Calculate average time threshold
@@ -427,9 +443,8 @@ async function showResults() {
               <p><span style="color: green;">✔ Correct Answer:</span> ${
                 item.options[item.correctIndex]
               }</p>
-              <p><strong>Explanation:</strong> ${
-                item.explanation || "No explanation provided."
-              }</p>
+              <p><strong>Explanation:</strong> ${formatExplanation(item.explanation)}</p>
+
               <hr>
           `;
       incorrectContainer.appendChild(div);
@@ -451,6 +466,8 @@ async function showResults() {
   if (accuracy >= 90) {
     triggerHighAccuracyCelebration();
   }
+  // In showResults function, before the last closing brace
+await trackGoalProgress(score, currentQuiz.length);
 }
 
 function triggerFlashcardMilestoneCelebration(milestone) {
@@ -559,13 +576,12 @@ function showFlashcards() {
           <div class="flashcard-content">
             <h3>Answer</h3>
             <p><strong>Correct Answer:</strong> ${question.options[question.correctIndex]}</p>
-            <p><strong>Explanation:</strong> ${question.explanation || "No explanation provided."}</p>
+<p><strong>Explanation:</strong> ${formatExplanation(question.explanation)}</p>
             <p><strong>Times Incorrect:</strong> ${question.timesIncorrect || 0}</p>
           </div>
         </div>
       </div>
     `;
-
 
     flashcard.addEventListener("click", () => {
       flashcard.classList.toggle("flipped");
@@ -575,7 +591,8 @@ function showFlashcards() {
       const incorrectText = flashcard.querySelector(".flashcard-content p:last-child");
       incorrectText.classList.add("incorrect-attempt");
     }
-const editBtn = flashcard.querySelector('.edit-question-btn');
+// Add edit button click handler
+    const editBtn = flashcard.querySelector('.edit-question-btn');
     editBtn.addEventListener('click', (e) => {
       e.stopPropagation(); // Prevent flip when clicking edit
       showEditQuestionForm(index, question);
@@ -591,95 +608,6 @@ const editBtn = flashcard.querySelector('.edit-question-btn');
 
 }
 
-
-
-
-
-function showEditQuestionForm(index, question) {
-  // Create modal overlay
-  const modal = document.createElement('div');
-  modal.className = 'edit-question-modal';
-  
-  // Create form with current values
-  modal.innerHTML = `
-    <div class="edit-question-form">
-      <h3>Edit Question</h3>
-      <form id="editQuestionForm">
-        <label>
-          Question Text:
-          <textarea name="question" required>${question.question}</textarea>
-        </label>
-        
-        <div class="options-container">
-          <label>Options:</label>
-          ${question.options.map((option, i) => `
-            <div class="option-row">
-              <input type="text" name="option${i}" value="${option}" required>
-              <input type="radio" name="correctIndex" value="${i}" ${i === question.correctIndex ? 'checked' : ''}>
-              <span>Correct</span>
-            </div>
-          `).join('')}
-        </div>
-        
-        <label>
-          Explanation:
-          <textarea name="explanation">${question.explanation || ''}</textarea>
-        </label>
-        
-        <div class="form-buttons">
-          <button type="submit" class="quiz-btn">Save</button>
-          <button type="button" class="quiz-btn cancel-btn">Cancel</button>
-        </div>
-      </form>
-    </div>
-  `;
-  
-  document.body.appendChild(modal);
-  
-  // Handle form submission
-  const form = modal.querySelector('#editQuestionForm');
-  form.addEventListener('submit', (e) => {
-    e.preventDefault();
-    
-    // Get form values
-    const formData = new FormData(form);
-    const updatedQuestion = {
-      question: formData.get('question'),
-      options: [],
-      correctIndex: parseInt(formData.get('correctIndex')),
-      explanation: formData.get('explanation') || '',
-      timesIncorrect: question.timesIncorrect || 0
-    };
-    
-    // Get all options
-    for (let i = 0; i < question.options.length; i++) {
-      updatedQuestion.options.push(formData.get(`option${i}`));
-    }
-    
-    // Update in memory
-    quizzes[currentFolder][index] = updatedQuestion;
-    
-    // Save to IndexedDB
-    saveQuizzes().then(() => {
-      // Refresh flashcards
-      showFlashcards();
-      // Close modal
-      modal.remove();
-    });
-  });
-  
-  // Handle cancel
-  modal.querySelector('.cancel-btn').addEventListener('click', () => {
-    modal.remove();
-  });
-  
-  // Close modal when clicking outside
-  modal.addEventListener('click', (e) => {
-    if (e.target === modal) {
-      modal.remove();
-    }
-  });
-}
 // Enhanced encouragement system with improved timing and context awareness
 let lastEncouragementTime = 0;
 let lastBreakReminder = 0;
@@ -1292,16 +1220,7 @@ async function startQuiz(mode) {
   questionStartTime = Date.now(); // Moved this up
 
   // Ask for timer preference
-if (!isRapidRound) {
-  const useTimer = confirm("Would you like to enable a timer?");
-  if (useTimer) {
-    const minutes = parseInt(prompt("Enter time limit in minutes:", "5"));
-    if (!isNaN(minutes) && minutes > 0) {
-      timerEnabled = true;
-      startTimer(minutes);
-    }
-  }
-}
+  const useTimer = confirm("Would you like to enable a timer for this quiz?");
   if (useTimer) {
     const minutes = parseInt(prompt("Enter time limit in minutes:", "5"));
     if (!isNaN(minutes) && minutes > 0) {
@@ -1384,6 +1303,9 @@ function loadQuestion() {
 
 function goHome() {
   // Clear timer and reset states
+  if (rapidRoundActive) {
+    cleanupRapidRound();
+  }
   if (quizTimer) {
     clearInterval(quizTimer);
     quizTimer = null;
@@ -2534,7 +2456,6 @@ function updateMedalDisplay() {
   }
 }
 // Add this to your DOMContentLoaded event
-// Update DOMContentLoaded event listener
 document.addEventListener("DOMContentLoaded", async () => {
   try {
     // Initialize database
@@ -2543,24 +2464,30 @@ document.addEventListener("DOMContentLoaded", async () => {
     // Load data
     await loadQuizzes();
     
-    // Initialize goal tracking data
-    await initializeGoalData();
+    // Initialize goal tracking variables properly
+    folderGoals = JSON.parse(localStorage.getItem('folderGoals')) || {};
+    dailyProgress = JSON.parse(localStorage.getItem('dailyProgress')) || {};
     
-    // Update UI components
+    // Update UI components with null checks
     updateFolderList();
     updateMedalDisplay();
     checkBirthday();
     checkMissedDays();
     
-    // Set theme (keep using localStorage for this as it's small)
+    // Set theme
     const savedTheme = localStorage.getItem("quizTheme");
     document.body.classList.toggle("dark-theme", savedTheme === "dark" || savedTheme === null);
+    
+    // Set current year
+    const yearElement = document.getElementById('current-year');
+    if (yearElement) yearElement.textContent = new Date().getFullYear();
     
     // Update goal-related components
     updateGoalDisplay();
     updateFooterGoals();
-    
-    // Render calendar
+    // At the start of your script.js or goal.js
+checkForNewDay();
+    // Render calendar after everything else is ready
     setTimeout(() => {
       try {
         renderConsistencyCalendar();
@@ -2570,9 +2497,25 @@ document.addEventListener("DOMContentLoaded", async () => {
     }, 100);
     
   } catch (error) {
-    console.error("Initialization error:", error);
+    console.error("Initialization error details:", error);
   }
 });
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 const maxRetries = 3;
 let retries = 0;
 
@@ -3211,9 +3154,314 @@ function triggerHighAccuracyCelebration() {
     trophy.remove();
   }, 2000);
 }
-// Add this function to your script
+
+
+
+
+
+function showEditQuestionForm(index, question) {
+  // Create modal overlay
+  const modal = document.createElement('div');
+  modal.className = 'edit-question-modal';
+  
+  // Create form with current values
+  modal.innerHTML = `
+    <div class="edit-question-form">
+      <h3>Edit Question</h3>
+      <form id="editQuestionForm">
+        <label>
+          Question Text:
+          <textarea name="question" required>${question.question}</textarea>
+        </label>
+        
+        <div class="options-container">
+          <label>Options:</label>
+          ${question.options.map((option, i) => `
+            <div class="option-row">
+              <input type="text" name="option${i}" value="${option}" required>
+              <input type="radio" name="correctIndex" value="${i}" ${i === question.correctIndex ? 'checked' : ''}>
+              <span>Correct</span>
+            </div>
+          `).join('')}
+        </div>
+        
+        <label>
+          Explanation:
+          <textarea name="explanation">${question.explanation || ''}</textarea>
+        </label>
+        
+        <div class="form-buttons">
+          <button type="submit" class="quiz-btn">Save</button>
+          <button type="button" class="quiz-btn cancel-btn">Cancel</button>
+        </div>
+      </form>
+    </div>
+  `;
+  
+  document.body.appendChild(modal);
+  
+  // Handle form submission
+  const form = modal.querySelector('#editQuestionForm');
+  form.addEventListener('submit', (e) => {
+    e.preventDefault();
+    
+    // Get form values
+    const formData = new FormData(form);
+    const updatedQuestion = {
+      question: formData.get('question'),
+      options: [],
+      correctIndex: parseInt(formData.get('correctIndex')),
+      explanation: formData.get('explanation') || '',
+      timesIncorrect: question.timesIncorrect || 0
+    };
+    
+    // Get all options
+    for (let i = 0; i < question.options.length; i++) {
+      updatedQuestion.options.push(formData.get(`option${i}`));
+    }
+    
+    // Update in memory
+    quizzes[currentFolder][index] = updatedQuestion;
+    
+    // Save to IndexedDB
+    saveQuizzes().then(() => {
+      // Refresh flashcards
+      showFlashcards();
+      // Close modal
+      modal.remove();
+    });
+  });
+  
+  // Handle cancel
+  modal.querySelector('.cancel-btn').addEventListener('click', () => {
+    modal.remove();
+  });
+  
+  // Close modal when clicking outside
+  modal.addEventListener('click', (e) => {
+    if (e.target === modal) {
+      modal.remove();
+    }
+  });
+}
 function formatExplanation(explanation) {
   if (!explanation) return "No explanation provided.";
-  // Replace newlines with <br> tags and preserve other whitespace
-  return explanation.replace(/\n/g, '<br>');
+  
+  // Replace newlines with <br> tags for HTML display
+  const formattedText = explanation
+    .replace(/\n/g, '<br>') // Convert \n to <br>
+    .replace(/\s{2,}/g, ' ') // Collapse multiple spaces
+    .trim(); // Remove leading/trailing whitespace
+  
+  return `<span class="explanation-text">${formattedText}</span>`;
+}
+function showAddQuestionDialog() {
+  if (!currentFolder) {
+    alert("Please select a folder first!");
+    return;
+  }
+
+  // Create modal overlay
+  const modal = document.createElement('div');
+  modal.className = 'edit-question-modal';
+  
+  // Create form with empty fields
+  modal.innerHTML = `
+    <div class="edit-question-form">
+      <h3>Add New Question</h3>
+      <form id="addQuestionForm">
+        <label>
+          Question Text:
+          <textarea name="question" required></textarea>
+        </label>
+        
+        <div class="options-container">
+          <label>Options:</label>
+          <div class="option-row">
+            <input type="text" name="option0" required>
+            <input type="radio" name="correctIndex" value="0" checked>
+            <span>Correct</span>
+          </div>
+          <div class="option-row">
+            <input type="text" name="option1" required>
+            <input type="radio" name="correctIndex" value="1">
+            <span>Correct</span>
+          </div>
+          <div class="option-row">
+            <input type="text" name="option2" required>
+            <input type="radio" name="correctIndex" value="2">
+            <span>Correct</span>
+          </div>
+          <div class="option-row">
+            <input type="text" name="option3" required>
+            <input type="radio" name="correctIndex" value="3">
+            <span>Correct</span>
+          </div>
+        </div>
+        
+        <label>
+          Explanation:
+          <textarea name="explanation"></textarea>
+        </label>
+        
+        <label>
+          Position (leave blank to add at end):
+          <input type="number" name="position" min="1" placeholder="Position number">
+        </label>
+        
+        <div class="form-buttons">
+          <button type="submit" class="quiz-btn">Add Question</button>
+          <button type="button" class="quiz-btn cancel-btn">Cancel</button>
+          <button type="button" class="quiz-btn add-option-btn">Add Option</button>
+        </div>
+      </form>
+    </div>
+  `;
+  
+  document.body.appendChild(modal);
+  
+  // Handle form submission
+  const form = modal.querySelector('#addQuestionForm');
+  form.addEventListener('submit', (e) => {
+    e.preventDefault();
+    
+    // Get form values
+    const formData = new FormData(form);
+    const newQuestion = {
+      question: formData.get('question'),
+      options: [],
+      correctIndex: parseInt(formData.get('correctIndex')),
+      explanation: formData.get('explanation') || '',
+      timesIncorrect: 0
+    };
+    
+    // Get all options
+    for (let i = 0; i < 4; i++) {
+      const option = formData.get(`option${i}`);
+      if (option) {
+        newQuestion.options.push(option);
+      }
+    }
+    
+    // Validate at least 2 options
+    if (newQuestion.options.length < 2) {
+      alert("Please provide at least 2 options");
+      return;
+    }
+    
+    // Validate correct index is within range
+    if (newQuestion.correctIndex >= newQuestion.options.length) {
+      alert("Correct answer must be one of the provided options");
+      return;
+    }
+    
+    // Get position (default to end if not specified)
+    const position = formData.get('position') ? parseInt(formData.get('position')) - 1 : -1;
+    
+    // Add to folder
+    if (position >= 0 && position <= quizzes[currentFolder].length) {
+      quizzes[currentFolder].splice(position, 0, newQuestion);
+    } else {
+      quizzes[currentFolder].push(newQuestion);
+    }
+    
+    // Save to IndexedDB
+    saveQuizzes().then(() => {
+      // Close modal
+      modal.remove();
+      // Show success message
+      alert("Question added successfully!");
+    }).catch(error => {
+      console.error("Error saving question:", error);
+      alert("Failed to add question. Please try again.");
+    });
+  });
+  
+  // Handle cancel
+  modal.querySelector('.cancel-btn').addEventListener('click', () => {
+    modal.remove();
+  });
+  
+  // Handle adding options
+  let optionCount = 4; // Start with 4 options
+  modal.querySelector('.add-option-btn').addEventListener('click', () => {
+    if (optionCount >= 6) {
+      alert("Maximum of 6 options allowed");
+      return;
+    }
+    
+    const optionsContainer = modal.querySelector('.options-container');
+    const newOption = document.createElement('div');
+    newOption.className = 'option-row';
+    newOption.innerHTML = `
+      <input type="text" name="option${optionCount}" required>
+      <input type="radio" name="correctIndex" value="${optionCount}">
+      <span>Correct</span>
+    `;
+    optionsContainer.appendChild(newOption);
+    optionCount++;
+  });
+  
+  // Close modal when clicking outside
+  modal.addEventListener('click', (e) => {
+    if (e.target === modal) {
+      modal.remove();
+    }
+  });
+}
+
+
+
+// Add this function to delete a folder
+// Add this function to confirm folder deletion
+async function confirmDeleteFolder() {
+  if (!currentFolder) {
+    alert("Please select a folder first!");
+    return;
+  }
+
+  if (confirm(`Are you sure you want to permanently delete the folder "${currentFolder}" and all its data? This cannot be undone!`)) {
+    await deleteFolder(currentFolder);
+  }
+}
+
+// Add this function to handle folder deletion with all its data
+async function deleteFolder(folderName) {
+  try {
+    // 1. Delete from quizzes object
+    delete quizzes[folderName];
+    delete quizzes[`${folderName}_Incorrect`];
+    
+    // 2. Save updated quizzes to IndexedDB
+    await saveQuizzes();
+    
+    // 3. Delete analytics data for this folder
+    const transaction = db.transaction(["analytics"], "readwrite");
+    const store = transaction.objectStore("analytics");
+    const index = store.index("folderName");
+    const request = index.openCursor(folderName);
+    
+    request.onsuccess = (event) => {
+      const cursor = event.target.result;
+      if (cursor) {
+        store.delete(cursor.primaryKey);
+        cursor.continue();
+      }
+    };
+    
+    // 4. Reset current folder if it was the deleted one
+    if (currentFolder === folderName) {
+      currentFolder = "";
+    }
+    
+    // 5. Update UI
+    updateFolderList();
+    document.getElementById("quizOptions").classList.add("hidden");
+    
+    alert(`Folder "${folderName}" and all its data have been deleted successfully.`);
+    
+  } catch (error) {
+    console.error("Error deleting folder:", error);
+    alert("Failed to delete folder. Please try again.");
+  }
 }
