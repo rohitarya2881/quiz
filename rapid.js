@@ -1,4 +1,6 @@
 // Update rapid.js with range-specific flashcards
+let isRapidRound = false;
+let currentRapidTimer = null;
 
 let rapidRoundSettings = {
   folder: "",
@@ -128,39 +130,24 @@ function endRapidRound() {
 }
 
 function cleanupRapidRound() {
-  // Clear any timers
   if (currentRapidTimer) {
     clearInterval(currentRapidTimer);
     currentRapidTimer = null;
   }
-  
-  // Remove timer display
+
   const timerDisplay = document.getElementById('rapidTimerDisplay');
   if (timerDisplay) timerDisplay.remove();
-  
-  // Remove rapid round controls
+
   if (rapidRoundControls) {
     rapidRoundControls.remove();
     rapidRoundControls = null;
   }
-  
-  // Reset rapid round state
+
   rapidRoundActive = false;
   rapidRoundPhase = "";
-  
-  // If in quiz phase, make sure to save results
-  if (currentQuestionIndex < currentQuiz.length) {
-    // Mark remaining questions as incorrect
-    while (currentQuestionIndex < currentQuiz.length) {
-      const question = currentQuiz[currentQuestionIndex];
-      question.timesIncorrect = (question.timesIncorrect || 0) + 1;
-      question.selectedAnswer = "Rapid Round Ended";
-      incorrectQuestions.push(question);
-      currentQuestionIndex++;
-    }
-    showResults();
-  }
+  isRapidRound = false;
 }
+
 
 
 function startRapidQuizPhase() {
@@ -185,74 +172,45 @@ function startRapidQuizPhase() {
 }
 
 
-
-
 function startRapidStudyPhase() {
   rapidRoundActive = true;
   rapidRoundPhase = "study";
-  
-  // Set current folder
+  isRapidRound = true;
+
   currentFolder = rapidRoundSettings.folder;
-  
-  // Set question range
+
   document.getElementById('startIndex').value = rapidRoundSettings.startIndex;
   document.getElementById('endIndex').value = rapidRoundSettings.endIndex;
-  
-  // Create and show rapid round controls
+
   createRapidRoundControls();
-  
-  // Show flashcards for the selected range only
   showRapidFlashcards();
-  
-  // Start study timer using seconds
-  startRapidTimer(rapidRoundSettings.studySeconds, "Study Time Left:", () => {
-    // When study time ends, start quiz phase
-    startRapidQuizPhase();
-  });
+
+  currentRapidTimer = startRapidTimer(
+    rapidRoundSettings.studySeconds,
+    "Study Time Left:",
+    startRapidQuizPhase
+  );
 }
 
-
-function startRapidStudyPhase() {
-  rapidRoundActive = true;
-  rapidRoundPhase = "study";
-  
-  // Set current folder
-  currentFolder = rapidRoundSettings.folder;
-  
-  // Set question range
-  document.getElementById('startIndex').value = rapidRoundSettings.startIndex;
-  document.getElementById('endIndex').value = rapidRoundSettings.endIndex;
-  
-  // Show flashcards for the selected range only
-  showRapidFlashcards();
-  
-  // Start study timer using seconds
-  startRapidTimer(rapidRoundSettings.studySeconds, "Study Time Left:", () => {
-    // When study time ends, start quiz phase
-    startRapidQuizPhase();
-  });
-}
 
 function startRapidQuizPhase() {
   rapidRoundPhase = "quiz";
-  
-  // Make sure quiz container is visible
+
   document.getElementById("quizContainer").classList.remove("hidden");
   document.getElementById("flashcardContainer").classList.add("hidden");
-  
-  // Start quiz with the same range
+
   document.getElementById('startIndex').value = rapidRoundSettings.startIndex;
   document.getElementById('endIndex').value = rapidRoundSettings.endIndex;
-  
-  // Start quiz with timer
-  startQuiz('complete');
-  
-  // Start quiz timer using seconds
-  currentRapidTimer = startRapidTimer(rapidRoundSettings.quizSeconds, "Quiz Time Left:", () => {
-    // When quiz time ends, show results
-    showRapidRoundResults();
-  });
+
+  startQuiz('complete'); // timer prompt will be skipped
+
+  currentRapidTimer = startRapidTimer(
+    rapidRoundSettings.quizSeconds,
+    "Quiz Time Left:",
+    showRapidRoundResults
+  );
 }
+
 // New function to show flashcards for the rapid round range
 function showRapidFlashcards() {
   if (!currentFolder || !quizzes[currentFolder] || quizzes[currentFolder].length === 0) {
@@ -346,9 +304,12 @@ function showRapidFlashcards() {
   startFlashcardStudySession(currentFolder);
 }
 
-
 function startRapidTimer(totalSeconds, labelText, onComplete) {
-  // Create or update timer display
+  if (currentRapidTimer) {
+    clearInterval(currentRapidTimer);
+    currentRapidTimer = null;
+  }
+
   totalSeconds = Math.floor(totalSeconds);
 
   let timerDisplay = document.getElementById('rapidTimerDisplay');
@@ -358,82 +319,47 @@ function startRapidTimer(totalSeconds, labelText, onComplete) {
     timerDisplay.className = 'rapid-timer';
     document.body.appendChild(timerDisplay);
   }
-  
+
   timerDisplay.innerHTML = `
     <div class="rapid-timer-content">
       <span>${labelText}</span>
       <span id="rapidTimerValue">${formatTime(totalSeconds)}</span>
     </div>
   `;
-  
+
   let secondsLeft = totalSeconds;
   const timerValue = document.getElementById('rapidTimerValue');
-  
-  // Start timer
+
   const timer = setInterval(() => {
     secondsLeft--;
     timerValue.textContent = formatTime(secondsLeft);
-    
-    // Change color when time is running low
+
     if (secondsLeft <= 30) {
       timerDisplay.classList.add('warning');
     }
-    
-    // When time is up
+
     if (secondsLeft <= 0) {
       clearInterval(timer);
       timerDisplay.remove();
       onComplete();
     }
   }, 1000);
-  return timer; // Return the timer ID
 
+  return timer;
 }
+
+
 function showRapidRoundResults() {
-  // Show standard quiz results
-  showResults();
-  
-  // Add restart button regardless of timer
-  const resultsContainer = document.getElementById('quizContainer');
-  const buttonContainer = document.createElement('div');
-  buttonContainer.className = 'rapid-round-buttons';
-  
-  const restartBtn = document.createElement('button');
-  restartBtn.className = 'quiz-btn rapid-round-btn';
-  restartBtn.textContent = 'Restart Rapid Round';
-  restartBtn.onclick = () => {
-    // Clear the results display first
-    resultsContainer.innerHTML = `
-      <div id="quiz-progress">
-        <span id="current-question">1</span> / <span id="total-questions">0</span>
-      </div>
-      <div id="quiz-timer">
-        Time Left: <span id="time-display">00:00</span>
-      </div>
-      <h2 id="question-text">Question will appear here</h2>
-      <div id="options"></div>
-    `;
-    restartRapidRound();
-  };
-  
-  const endBtn = document.createElement('button');
-  endBtn.className = 'quiz-btn rapid-round-btn end-btn';
-  endBtn.textContent = 'End Rapid Round';
-  endBtn.onclick = endRapidRound;
-  
-  buttonContainer.appendChild(restartBtn);
-  buttonContainer.appendChild(endBtn);
-  resultsContainer.appendChild(buttonContainer);
-  
-  // Clear any existing timer
-  const timerDisplay = document.getElementById('rapidTimerDisplay');
-  if (timerDisplay) timerDisplay.remove();
-  
-  // Show completion celebration if all answers were correct
-  if (score === currentQuiz.length) {
-    triggerHighAccuracyCelebration();
+  isRapidRound = false;
+
+  if (currentRapidTimer) {
+    clearInterval(currentRapidTimer);
+    currentRapidTimer = null;
   }
+
+  showResults();
 }
+
 
 let currentRapidTimer = null;
 
