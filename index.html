@@ -12,9 +12,10 @@
     <script src="birth.js" defer></script>
     <link rel="stylesheet" href="birth.css">
     <script src="goal.js" defer></script>
-    <script src="rapid.js" defer></script>
-
     <link rel="stylesheet" href="goal.css">
+    <script src="rapid.js" defer></script>
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#000000">
 
     <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -61,26 +62,26 @@
     <div id="mobile-menu">
         <button id="close-menu-btn" onclick="toggleMenu()">&times;</button>
         <h3>Quiz Management</h3>
-        <button class="button-quiz" onclick="toggleTheme()">Toggle Theme</button>
-
-        <button class="button-quiz " onclick="startRapidRound()">Rapid Round</button>
-        <button class="button-quiz" onclick="showFlashcards()">Flashcards</button>
+                <button class="button-quiz" onclick="toggleTheme()">Toggle Theme</button>
 
         <button class="button-quiz" onclick="setFolderGoals()">Set Folder Goals</button>
+                <button class="button-quiz " onclick="startRapidRound()">Rapid Round</button>
+<!-- Inside the mobile-menu div, add this button -->
+<button class="button-quiz" onclick="showAddQuestionDialog()">Add Question</button>
+                <button class="button-quiz" onclick="showFlashcards()">Flashcards</button>
+
         <button class="button-quiz" onclick="createFolder()">Create Folder</button>
-        <button class="button-quiz" onclick="showAnalysis()">Quiz Analysis</button>
-        <button class="button-quiz delete-btn" onclick="confirmDeleteFolder()">Delete Folder</button>
-
-
-        <button class="button-quiz" onclick="document.getElementById('jsonFileInputUpload').click()">Upload Quiz
-            JSON</button>
-        <button class="button-quiz" onclick="document.getElementById('jsonFileInputRestore').click()">Restore
+          <button class="button-quiz" onclick="document.getElementById('jsonFileInputRestore').click()">Restore
             Data</button>
+
+      
         <button class="button-quiz" onclick="downloadData()">Download Memory</button>
+                <button class="button-quiz" onclick="document.getElementById('jsonFileInputUpload').click()">Upload Quiz
+            JSON</button>
         <button class="button-quiz" onclick="shuffleQuiz()">Shuffle Quiz</button>
         <button class="button-quiz" onclick="clearMemory()">Clear Memory</button>
-        <button class="button-quiz" onclick="clearAndRefresh()">Reset All Data</button>
-        <!-- Inside your mobile-menu div, add this button: -->
+        <button class="button-quiz delete-btn" onclick="confirmDeleteFolder()">Delete Folder</button>
+        <button class="button-quiz" onclick="showAnalysis()">Quiz Analysis</button>
         <input type="file" id="jsonFileInputUpload" style="display: none;" accept=".json"
             onchange="handleFileUpload(event)">
         <input type="file" id="jsonFileInputRestore" style="display: none;" accept=".json"
@@ -103,7 +104,6 @@
         <div id="quizOptions" class="hidden">
             <button class="quiz-btn" onclick="startQuiz('complete')">Start Quiz</button>
             <button class="quiz-btn" onclick="startQuiz('difficult')">Difficult Part</button>
-            <button class="quiz-btn" onclick="showHardRecallQuestions()">Practice Hard Recall Questions</button>
         </div>
 
         <div id="quizContainer" class="container hidden">
@@ -222,6 +222,13 @@
 
     </footer>
     <button class="back-to-top" onclick="window.scrollTo({top: 0, behavior: 'smooth'})">↑</button>
+<script>
+if ('serviceWorker' in navigator) {
+  navigator.serviceWorker.register('service-worker.js')
+    .then(() => console.log("Service Worker Registered"));
+}
+</script>
+
 </body>
 
 </html>
