@@ -1292,7 +1292,16 @@ async function startQuiz(mode) {
   questionStartTime = Date.now(); // Moved this up
 
   // Ask for timer preference
-  const useTimer = confirm("Would you like to enable a timer for this quiz?");
+if (!isRapidRound) {
+  const useTimer = confirm("Would you like to enable a timer?");
+  if (useTimer) {
+    const minutes = parseInt(prompt("Enter time limit in minutes:", "5"));
+    if (!isNaN(minutes) && minutes > 0) {
+      timerEnabled = true;
+      startTimer(minutes);
+    }
+  }
+}
   if (useTimer) {
     const minutes = parseInt(prompt("Enter time limit in minutes:", "5"));
     if (!isNaN(minutes) && minutes > 0) {
