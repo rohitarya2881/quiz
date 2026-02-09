@@ -1,127 +1,101 @@
 // Global variables for goal tracking
-let folderGoals = {};
-let dailyProgress = {};
-// Goal tracking database operations
-async function getGoalData(type) {
-  return new Promise((resolve, reject) => {
-    const transaction = db.transaction(["goalTracking"], "readonly");
-    const store = transaction.objectStore("goalTracking");
-    const index = store.index("type");
-    const request = index.getAll(type);
+let folderGoals = JSON.parse(localStorage.getItem('folderGoals')) || {};
+let dailyProgress = JSON.parse(localStorage.getItem('dailyProgress')) || {};
 
-    request.onsuccess = () => {
-      resolve(request.result[0]?.data || {});
-    };
-    request.onerror = (event) => reject(event.target.error);
-  });
-}
-
-async function setGoalData(type, data) {
-  return new Promise((resolve, reject) => {
-    const transaction = db.transaction(["goalTracking"], "readwrite");
-    const store = transaction.objectStore("goalTracking");
-    const request = store.put({ id: type, type, data });
-
-    request.onsuccess = () => resolve();
-    request.onerror = (event) => reject(event.target.error);
-  });
-}
 // Function to set folder goals
-async function setFolderGoals() {
-  const folderNames = Object.keys(quizzes).filter(f => !f.includes('_Incorrect'));
-  if (folderNames.length === 0) {
-    alert("No folders available. Please create folders first.");
-    return;
-  }
-
-  let selectedFolders = [];
-  let questionsPerDay = 10;
+function setFolderGoals() {
+    const folderNames = Object.keys(quizzes).filter(f => !f.includes('_Incorrect'));
+    if (folderNames.length === 0) {
+      alert("No folders available. Please create folders first.");
+      return;
+    }
   
-  // Create dialog for folder selection
-  const dialog = document.createElement('div');
-  dialog.style.position = 'fixed';
-  dialog.style.top = '0';
-  dialog.style.left = '0';
-  dialog.style.width = '100%';
-  dialog.style.height = '100%';
-  dialog.style.backgroundColor = 'rgba(0,0,0,0.5)';
-  dialog.style.display = 'flex';
-  dialog.style.justifyContent = 'center';
-  dialog.style.alignItems = 'center';
-  dialog.style.zIndex = '1000';
-  
-  // Get current goals for pre-selection
-  const currentGoals = Object.keys(folderGoals);
-  
-  dialog.innerHTML = `
-    <div style="background: #0D1117; padding: 20px; border-radius: 8px; max-width: 500px; width: 90%; max-height: 80vh; overflow-y: auto;">
-      <h3>Manage Daily Goals</h3>
-      <p>Select folders and set daily question targets:</p>
-      
-      <div style="margin: 15px 0;">
-        <label>Questions per folder per day: 
-          <input type="number" id="goalQuestionsInput" min="1" value="10" style="width: 60px;">
-        </label>
-      </div>
-      
-      <div style="max-height: 200px; overflow-y: auto; border: 1px solid #ddd; padding: 10px; margin-bottom: 15px;">
-        ${folderNames.map(folder => `
-          <div style="margin: 5px 0; display: flex; align-items: center;">
-            <input type="checkbox" id="folder-${folder}" value="${folder}" 
-                   ${currentGoals.includes(folder) ? 'checked' : ''}>
-            <label for="folder-${folder}" style="flex-grow: 1;">${folder}</label>
-            ${currentGoals.includes(folder) ? `
-              <span style="color: #aaa; font-size: 0.9em; margin-left: 10px;">
-                Current: ${folderGoals[folder].dailyQuestions} questions
-              </span>
-            ` : ''}
-          </div>
-        `).join('')}
-      </div>
-      
-      <div style="display: flex; justify-content: space-between;">
-        <button id="saveGoalsBtn" style="padding: 8px 15px; background: #4a6fa5; color: white; border: none; border-radius: 4px; cursor: pointer;">Save Changes</button>
-        <button id="removeAllBtn" style="padding: 8px 15px; background: #e74c3c; color: white; border: none; border-radius: 4px; cursor: pointer;">Remove All Goals</button>
-        <button id="cancelGoalsBtn" style="padding: 8px 15px; background: #ddd; border: none; border-radius: 4px; cursor: pointer;">Cancel</button>
-      </div>
-    </div>
-  `;
-  
-  document.body.appendChild(dialog);
-  
-  // Handle save button
-  dialog.querySelector('#saveGoalsBtn').addEventListener('click', async () => {
-    questionsPerDay = parseInt(document.getElementById('goalQuestionsInput').value) || 10;
-    const selectedCheckboxes = Array.from(dialog.querySelectorAll('input[type="checkbox"]:checked'));
-    const unselectedCheckboxes = Array.from(dialog.querySelectorAll('input[type="checkbox"]:not(:checked)'));
+    let selectedFolders = [];
+    let questionsPerDay = 10;
     
-    // Add new goals for selected folders
-    selectedCheckboxes.forEach(el => {
-      const folder = el.value;
-      if (!folderGoals[folder]) {
-        folderGoals[folder] = {
-          dailyQuestions: questionsPerDay,
-          completedToday: 0,
-          lastIndex: 0
-        };
-      } else {
-        // Update question count if already exists
-        folderGoals[folder].dailyQuestions = questionsPerDay;
-      }
-    });
+    // Create dialog for folder selectionnnn
+    const dialog = document.createElement('div');
+    dialog.style.position = 'fixed';
+    dialog.style.top = '0';
+    dialog.style.left = '0';
+    dialog.style.width = '100%';
+    dialog.style.height = '100%';
+    dialog.style.backgroundColor = 'rgba(0,0,0,0.5)';
+    dialog.style.display = 'flex';
+    dialog.style.justifyContent = 'center';
+    dialog.style.alignItems = 'center';
+    dialog.style.zIndex = '1000';
     
-    // Remove goals for unselected folders
-    unselectedCheckboxes.forEach(el => {
-      const folder = el.value;
-      if (folderGoals[folder]) {
-        delete folderGoals[folder];
-      }
-    });
+    // Get current goals for pre-selection
+    const currentGoals = Object.keys(folderGoals);
     
-    try {
-      // NEW: Save to IndexedDB instead of localStorage
-      await setGoalData("folderGoals", folderGoals);
-      await updateGoalDisplay();
+    dialog.innerHTML = `
+      <div style="background: #0D1117; padding: 20px; border-radius: 8px; max-width: 500px; width: 90%; max-height: 80vh; overflow-y: auto;">
+        <h3>Manage Daily Goals</h3>
+        <p>Select folders and set daily question targets:</p>
+        
+        <div style="margin: 15px 0;">
+          <label>Questions per folder per day: 
+            <input type="number" id="goalQuestionsInput" min="1" value="10" style="width: 60px;">
+          </label>
+        </div>
+        
+        <div style="max-height: 200px; overflow-y: auto; border: 1px solid #ddd; padding: 10px; margin-bottom: 15px;">
+          ${folderNames.map(folder => `
+            <div style="margin: 5px 0; display: flex; align-items: center;">
+              <input type="checkbox" id="folder-${folder}" value="${folder}" 
+                     ${currentGoals.includes(folder) ? 'checked' : ''}>
+              <label for="folder-${folder}" style="flex-grow: 1;">${folder}</label>
+              ${currentGoals.includes(folder) ? `
+                <span style="color: #aaa; font-size: 0.9em; margin-left: 10px;">
+                  Current: ${folderGoals[folder].dailyQuestions} questions
+                </span>
+              ` : ''}
+            </div>
+          `).join('')}
+        </div>
+        
+        <div style="display: flex; justify-content: space-between;">
+          <button id="saveGoalsBtn" style="padding: 8px 15px; background: #4a6fa5; color: white; border: none; border-radius: 4px; cursor: pointer;">Save Changes</button>
+          <button id="removeAllBtn" style="padding: 8px 15px; background: #e74c3c; color: white; border: none; border-radius: 4px; cursor: pointer;">Remove All Goals</button>
+          <button id="cancelGoalsBtn" style="padding: 8px 15px; background: #ddd; border: none; border-radius: 4px; cursor: pointer;">Cancel</button>
+        </div>
+      </div>
+    `;
+    
+    document.body.appendChild(dialog);
+    
+    // Handle save button
+    dialog.querySelector('#saveGoalsBtn').addEventListener('click', () => {
+      questionsPerDay = parseInt(document.getElementById('goalQuestionsInput').value) || 10;
+      const selectedCheckboxes = Array.from(dialog.querySelectorAll('input[type="checkbox"]:checked'));
+      const unselectedCheckboxes = Array.from(dialog.querySelectorAll('input[type="checkbox"]:not(:checked)'));
+      
+      // Add new goals for selected folders
+      selectedCheckboxes.forEach(el => {
+        const folder = el.value;
+        if (!folderGoals[folder]) {
+          folderGoals[folder] = {
+            dailyQuestions: questionsPerDay,
+            completedToday: 0,
+            lastIndex: 0
+          };
+        } else {
+          // Update question count if already exists
+          folderGoals[folder].dailyQuestions = questionsPerDay;
+        }
+      });
+      
+      // Remove goals for unselected folders
+      unselectedCheckboxes.forEach(el => {
+        const folder = el.value;
+        if (folderGoals[folder]) {
+          delete folderGoals[folder];
+        }
+      });
+      
+      localStorage.setItem('folderGoals', JSON.stringify(folderGoals));
+      updateGoalDisplay();
       dialog.remove();
       
       const addedCount = selectedCheckboxes.length;
@@ -140,35 +114,26 @@ async function setFolderGoals() {
       
       showAchievementNotification("Goals Updated", message, "🎯");
       updateFooterGoals();
-    } catch (error) {
-      console.error("Error saving goals:", error);
-      alert("Failed to save goals. Please try again.");
-    }
-  });
-  
-  // Handle remove all button
-  dialog.querySelector('#removeAllBtn').addEventListener('click', async () => {
-    if (confirm("Are you sure you want to remove ALL goals?")) {
-      folderGoals = {};
-      try {
-        // NEW: Save to IndexedDB instead of localStorage
-        await setGoalData("folderGoals", folderGoals);
-        await updateGoalDisplay();
+    });
+    
+    // Handle remove all button
+    dialog.querySelector('#removeAllBtn').addEventListener('click', () => {
+      if (confirm("Are you sure you want to remove ALL goals?")) {
+        folderGoals = {};
+        localStorage.setItem('folderGoals', JSON.stringify(folderGoals));
+        updateGoalDisplay();
         dialog.remove();
         showAchievementNotification("Goals Cleared", "All goals have been removed", "🗑️");
         updateFooterGoals();
-      } catch (error) {
-        console.error("Error removing goals:", error);
-        alert("Failed to remove goals. Please try again.");
       }
-    }
-  });
-  
-  // Handle cancel button
-  dialog.querySelector('#cancelGoalsBtn').addEventListener('click', () => {
-    dialog.remove();
-  });
-}
+    });
+    
+    // Handle cancel button
+    dialog.querySelector('#cancelGoalsBtn').addEventListener('click', () => {
+      dialog.remove();
+    });
+  }
+
 // Update goal progress display
 function updateGoalDisplay() {
   const goalsContainer = document.getElementById('activeGoals');
@@ -251,17 +216,7 @@ function startGoalQuiz(folder) {
 
 
 
-async function initializeGoalData() {
-  try {
-    folderGoals = await getGoalData("folderGoals") || {};
-    dailyProgress = await getGoalData("dailyProgress") || {};
-  } catch (error) {
-    console.error("Error loading goal data:", error);
-    // Fallback to localStorage if IndexedDB fails
-    folderGoals = JSON.parse(localStorage.getItem('folderGoals')) || {};
-    dailyProgress = JSON.parse(localStorage.getItem('dailyProgress')) || {};
-  }
-}
+
 
 
 
@@ -269,49 +224,43 @@ async function initializeGoalData() {
 
 // [Previous functions like setFolderGoals, updateGoalDisplay, etc. remain the same until trackGoalProgress]
 
-async function trackGoalProgress(correctAnswers, totalQuestions) {
-  const today = new Date().toISOString().split('T')[0];
-  
-  // Initialize data structures
-  if (!dailyProgress[today]) {
-    dailyProgress[today] = {};
-  }
-  if (!dailyProgress[today][currentFolder]) {
-    dailyProgress[today][currentFolder] = {
-      completed: 0,
-      correct: 0,
-      attempts: 0
-    };
-  }
-
-  // Update progress
-  const questionsCompleted = Number(totalQuestions);
-  dailyProgress[today][currentFolder].completed += questionsCompleted;
-  dailyProgress[today][currentFolder].correct += Number(correctAnswers);
-  dailyProgress[today][currentFolder].attempts += 1;
-
-  // Update folder goals if they exist
-  if (folderGoals[currentFolder]) {
-    folderGoals[currentFolder].completedToday = 
-      (folderGoals[currentFolder].completedToday || 0) + questionsCompleted;
+function trackGoalProgress(correctAnswers, totalQuestions) {
+    const today = new Date().toISOString().split('T')[0];
     
-    folderGoals[currentFolder].lastIndex += questionsCompleted;
-    
-    try {
-      await setGoalData("folderGoals", folderGoals);
-      await setGoalData("dailyProgress", dailyProgress);
-    } catch (error) {
-      console.error("Error saving progress:", error);
-      // Fallback to localStorage
-      localStorage.setItem('folderGoals', JSON.stringify(folderGoals));
-      localStorage.setItem('dailyProgress', JSON.stringify(dailyProgress));
+    // Initialize data structures
+    if (!dailyProgress[today]) {
+        dailyProgress[today] = {};
     }
-  }
+    if (!dailyProgress[today][currentFolder]) {
+        dailyProgress[today][currentFolder] = {
+            completed: 0,
+            correct: 0,
+            attempts: 0
+        };
+    }
 
-  await updateGoalDisplay();
-  renderConsistencyCalendar();
-  updateFooterGoals();
+    // Update progress (using proper number conversion)
+    const questionsCompleted = Number(totalQuestions);
+    dailyProgress[today][currentFolder].completed += questionsCompleted;
+    dailyProgress[today][currentFolder].correct += Number(correctAnswers);
+    dailyProgress[today][currentFolder].attempts += 1;
+
+    // Update folder goals if they exist
+    if (folderGoals[currentFolder]) {
+        folderGoals[currentFolder].completedToday = 
+            (folderGoals[currentFolder].completedToday || 0) + questionsCompleted;
+        
+        folderGoals[currentFolder].lastIndex += questionsCompleted;
+        
+        localStorage.setItem('folderGoals', JSON.stringify(folderGoals));
+        localStorage.setItem('dailyProgress', JSON.stringify(dailyProgress));
+    }
+
+    updateGoalDisplay();
+    renderConsistencyCalendar();
+    updateFooterGoals();
 }
+
 function renderConsistencyCalendar() {
     const calendarContainer = document.getElementById('consistencyCalendar');
     if (!calendarContainer) return;
@@ -448,27 +397,23 @@ function renderConsistencyCalendar() {
 
 
 
-// Update checkForNewDay
-async function checkForNewDay() {
-  const today = new Date().toISOString().split('T')[0];
-  const lastActiveDate = await getGoalData("lastActiveDate") || today;
-  
-  if (today !== lastActiveDate) {
-    // Reset completedToday counters for all goals
-    Object.keys(folderGoals).forEach(folder => {
-      folderGoals[folder].completedToday = 0;
-    });
+function checkForNewDay() {
+    const today = new Date().toISOString().split('T')[0];
+    const lastActiveDate = localStorage.getItem('lastActiveDate') || today;
     
-    try {
-      await setGoalData("lastActiveDate", today);
-      await setGoalData("folderGoals", folderGoals);
-    } catch (error) {
-      console.error("Error saving new day data:", error);
-      localStorage.setItem('lastActiveDate', today);
-      localStorage.setItem('folderGoals', JSON.stringify(folderGoals));
+    if (today !== lastActiveDate) {
+        // Reset completedToday counters for all goals
+        Object.keys(folderGoals).forEach(folder => {
+            folderGoals[folder].completedToday = 0;
+        });
+        
+        localStorage.setItem('lastActiveDate', today);
+        localStorage.setItem('folderGoals', JSON.stringify(folderGoals));
+        
+        console.log("New day detected - reset daily counters");
     }
-  }
 }
+
 
 
 // Update footer goals display
